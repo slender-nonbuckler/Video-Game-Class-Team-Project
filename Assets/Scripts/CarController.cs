@@ -1,0 +1,110 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CarController : MonoBehaviour {
+    [Header("References")]
+    [SerializeField] private Rigidbody carRigidbody;
+    [SerializeField] private TireComponent[] tireComponents;
+    [SerializeField] private TireComponent[] steerableTireComponents;
+    [SerializeField] private TireComponent[] drivetrainTireComponents;
+    [SerializeField] private Transform centerOfMass;
+
+    [Header("Engine Setting")]
+    [SerializeField] private AnimationCurve torqueCurve;
+    [SerializeField] private float topSpeed;
+    [SerializeField] private float maxSteeringAngle;
+    
+
+    [Header("Tire Settings")]
+    [SerializeField] private float tireRadius;
+    [SerializeField] private float tireMass;
+    [SerializeField] private float tireRollingDrag;
+    [SerializeField] private AnimationCurve tireGripCurve;
+    
+    
+    [Header("Suspension Settings")]
+    [SerializeField] private float restDistance;
+    [SerializeField] private float strength;
+    [SerializeField] private float damping;
+    
+
+
+    [Header("Force Visual Settings")]
+    [SerializeField] public bool isShowingRollForce = false;
+    [SerializeField] public bool isShowingGripForce = false;
+    [SerializeField] public bool isShowingSuspensionForce = false;
+    [SerializeField] public bool isShowingTotalForces = false;
+    [SerializeField] public bool isShowingWheelContact = false;
+
+    private Vector2 inputs = Vector2.zero;
+    private float startHeight;
+
+    void Start() {
+        SyncTireComponentSettings();
+
+        if (centerOfMass != null) {
+            carRigidbody.centerOfMass = centerOfMass.localPosition;
+        }
+
+        startHeight = transform.position.y;
+    }
+
+    void Update() {
+        foreach (TireComponent tireComponent in tireComponents) {
+            //Debug.Log("Setting Tire Inputs: " + inputs);
+            tireComponent.SetInputs(inputs);
+        }
+
+        if (Input.GetButtonDown("Jump")) {
+            Reset();
+        }
+
+        UpdateForceVisualSettings();
+    }
+
+    public void SetInputs(Vector2 inputs) {
+        this.inputs = inputs;
+    }
+
+    private void Reset() {
+        transform.position = new Vector3(transform.position.x, startHeight, transform.position.z);
+        transform.rotation = Quaternion.LookRotation(transform.forward);
+    }
+
+    private void UpdateForceVisualSettings() {
+        foreach (TireComponent tireComponent in tireComponents) {
+            tireComponent.isShowingGripForce = isShowingGripForce;
+            tireComponent.isShowingRollForce = isShowingRollForce;
+            tireComponent.isShowingSuspensionForce = isShowingSuspensionForce;
+            tireComponent.isShowingTotalForces = isShowingTotalForces;
+            tireComponent.isShowingWheelContact = isShowingWheelContact;
+        }
+    }
+
+    private void SyncTireComponentSettings() {
+        foreach (TireComponent tireComponent in tireComponents) {
+            tireComponent.SetAttachedRigidbody(carRigidbody);
+            tireComponent.maxSpeed = topSpeed;
+            tireComponent.torqueCurve = torqueCurve;
+            tireComponent.maxSteeringAngle = maxSteeringAngle;
+
+            tireComponent.gripCurve = tireGripCurve;
+            tireComponent.tireRadius = tireRadius;
+            tireComponent.mass = tireMass;
+            tireComponent.rollDrag = tireRollingDrag;
+
+            tireComponent.restDistance = restDistance;
+            tireComponent.strength = strength;
+            tireComponent.damping = damping;
+        }
+
+        foreach (TireComponent tireComponent in steerableTireComponents) {
+            tireComponent.isSteerable = true;
+        }
+
+        foreach (TireComponent tireComponent in drivetrainTireComponents) {
+            tireComponent.isPartOfDrivetrain = true;
+        }
+    }
+}
