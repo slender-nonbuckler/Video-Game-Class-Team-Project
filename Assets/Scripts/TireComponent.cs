@@ -38,7 +38,7 @@ public class TireComponent : MonoBehaviour {
 
     private float accelerationInput = 0f;
     private float steerInput = 0f;
-
+    private bool isGrounded = false;
 
     void Update() {
     }
@@ -47,6 +47,10 @@ public class TireComponent : MonoBehaviour {
         Steer();
         ApplyTotalForces();
         UpdateTireVisuals();
+    }
+
+    public bool IsGrounded() {
+        return isGrounded;
     }
 
     public void SetInputs(Vector2 inputs) {
@@ -62,6 +66,7 @@ public class TireComponent : MonoBehaviour {
         RaycastHit raycastHit;
         
         if (Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers)) {
+            isGrounded = true;
             Vector3 totalForces = GetSuspensionForce(raycastHit) + GetGripForce(raycastHit) + GetRollForce(raycastHit); 
             rigidbodyAttachedTo.AddForceAtPosition(totalForces, transform.position);
             
@@ -71,6 +76,7 @@ public class TireComponent : MonoBehaviour {
             if (isShowingTotalForces) { Debug.DrawLine(raycastHit.point + totalForces, raycastHit.point, Color.cyan); }
             if (isShowingWheelContact) { Debug.DrawLine(transform.position, raycastHit.point, Color.yellow); }
         } else {
+            isGrounded = false;
             if (isShowingWheelContact) { Debug.DrawLine(transform.position, transform.position + restDistance * -transform.up, Color.magenta); }
         }
     }

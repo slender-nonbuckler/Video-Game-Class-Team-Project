@@ -14,6 +14,9 @@ public class CarController : MonoBehaviour {
     [SerializeField] private AnimationCurve torqueCurve;
     [SerializeField] private float topSpeed;
     [SerializeField] private float maxSteeringAngle;
+    [SerializeField] private float selfRightingStrength = 0.5f;
+    [SerializeField] private float selfRightingDamping = 0.5f;
+    [SerializeField] private float selfRightingDeadSpotDistance = 0.2f;
     
 
     [Header("Tire Settings")]
@@ -63,8 +66,25 @@ public class CarController : MonoBehaviour {
         UpdateForceVisualSettings();
     }
 
+    void FixedUpdate() {
+        bool isGrounded = getIsGrounded();
+        if (isGrounded == false) {
+            ApplySelfRightingForce();
+        }
+    }
+
     public void SetInputs(Vector2 inputs) {
         this.inputs = inputs;
+    }
+
+    private bool getIsGrounded() {
+        foreach (TireComponent tireComponent in tireComponents) {
+            if (tireComponent.IsGrounded()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void Reset() {
@@ -106,5 +126,12 @@ public class CarController : MonoBehaviour {
         foreach (TireComponent tireComponent in drivetrainTireComponents) {
             tireComponent.isPartOfDrivetrain = true;
         }
+    }
+
+    private Vector3 prevAngularVel = Vector3.zero;
+    private void ApplySelfRightingForce() {
+        var springTorque = selfRightingStrength * Vector3.Cross(carRigidbody.transform.up, Vector3.up);
+        var dampTorque = selfRightingDamping * -carRigidbody.angularVelocity;
+        carRigidbody.AddTorque(springTorque + dampTorque, ForceMode.Acceleration);
     }
 }
