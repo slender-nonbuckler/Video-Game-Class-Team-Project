@@ -5,20 +5,51 @@ using UnityEngine;
 public class AiDriver : MonoBehaviour{
     [Header("References")]
     [SerializeField] private CarController carController;
-    private Vector2 inputs = Vector2.up * 0.5f;
+    private Vector2 inputs = Vector2.up * 0.2f;
+    [SerializeField] private List<Transform> waypoints;
+
+    void Start() {
+        GetWaypoints();
+    }
 
     void Update() {
-        UpdateInputs();
+        SteerTowardsNearestWaypoint();
         if (carController != null) {
             carController.SetInputs(inputs);
         }
     }
 
-    private void UpdateInputs() {
-        Vector3 randomVector = Random.onUnitSphere;
-        Vector2 changeInInputs = new Vector2(randomVector.x, randomVector.y);
-        inputs = inputs + changeInInputs * Time.deltaTime;
-        inputs.x = Mathf.Clamp(inputs.x, -1f, 1f);
-        inputs.y = Mathf.Clamp(inputs.y, -1f, 1f);
+    private void GetWaypoints() {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(AiWaypoint.TAG);
+
+        foreach (GameObject gameObject in gameObjects) {
+            waypoints.Add(gameObject.transform);
+        }
+    }
+
+    private void SteerTowardsNearestWaypoint() {
+        Transform nearestWaypoint = GetNearestWaypoint();
+        SteerToMatchRotation(nearestWaypoint);
+    }
+
+    private Transform GetNearestWaypoint() {
+        Transform nearest = transform;
+        float minDistance = Mathf.Infinity;
+
+        foreach (Transform waypoint in waypoints) {
+            float distance = Vector3.Distance(transform.position, waypoint.position);
+            if (distance < minDistance) {
+                nearest = waypoint;
+                minDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
+    private void SteerToMatchRotation(Transform other) {
+        float dotProduct = Vector3.Dot(transform.forward, other.forward);
+        Debug.DrawLine(transform.position, transform.position + transform.right * dotProduct * 10, Color.red);
+        inputs.x = Mathf.Clamp(dotProduct, -1f, 1f);
     }
 }
