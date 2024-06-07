@@ -16,7 +16,6 @@ public class CarController : MonoBehaviour {
     [SerializeField] private float maxSteeringAngle;
     [SerializeField] private float selfRightingStrength = 0.5f;
     [SerializeField] private float selfRightingDamping = 0.5f;
-    [SerializeField] private float selfRightingDeadSpotDistance = 0.2f;
     
 
     [Header("Tire Settings")]
@@ -67,10 +66,7 @@ public class CarController : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        bool isGrounded = getIsGrounded();
-        if (isGrounded == false) {
-            ApplySelfRightingForce();
-        }
+        ApplySelfRightingForce();
     }
 
     public void SetInputs(Vector2 inputs) {

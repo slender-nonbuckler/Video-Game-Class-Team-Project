@@ -409,6 +409,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   topSpeed: 25
   maxSteeringAngle: 12.5
+  selfRightingStrength: 0.5
+  selfRightingDamping: 0.4
   tireRadius: 0.5
   tireMass: 0.25
   tireRollingDrag: 5

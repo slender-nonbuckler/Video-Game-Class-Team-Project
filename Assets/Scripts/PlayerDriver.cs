@@ -7,7 +7,7 @@ public class PlayerDriver : MonoBehaviour {
     [SerializeField] private CarController carController;
 
     void Update() {
-        Vector2 inputs = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        Vector2 inputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if (carController != null) {
             //Debug.Log("Setting Car Inputs: " + inputs);
             carController.SetInputs(inputs);
