@@ -5,7 +5,7 @@ using UnityEngine;
 public class AiDriver : MonoBehaviour{
     [Header("References")]
     [SerializeField] private CarController carController;
-    private Vector2 inputs = Vector2.up * 0.2f;
+    private Vector2 inputs = Vector2.up * 1f;
     [SerializeField] private List<Transform> waypoints;
 
     void Start() {
@@ -48,7 +48,7 @@ public class AiDriver : MonoBehaviour{
     }
 
     private void SteerToMatchRotation(Transform other) {
-        float dotProduct = Vector3.Dot(transform.forward, other.forward);
+        float dotProduct = Vector3.Dot(transform.right, other.forward);
         Debug.DrawLine(transform.position, transform.position + transform.right * dotProduct * 10, Color.red);
         inputs.x = Mathf.Clamp(dotProduct, -1f, 1f);
     }
