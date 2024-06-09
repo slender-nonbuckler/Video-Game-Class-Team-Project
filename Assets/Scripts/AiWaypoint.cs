@@ -13,8 +13,12 @@ public class AiWaypoint : MonoBehaviour {
     private void OnDrawGizmos() {
         Gizmos.color = Color.red;
         Vector3 direction = transform.forward;
-        Gizmos.DrawRay(transform.position, direction * rayLength);
-        Gizmos.DrawWireSphere(transform.position, sphereRadius);
+        Vector3 rayEnd = transform.position + direction * rayLength;
+        Gizmos.DrawLine(transform.position, rayEnd);
+        Gizmos.DrawLine(rayEnd, rayEnd + transform.right + -transform.forward);
+        Gizmos.DrawLine(rayEnd, rayEnd + -transform.right + -transform.forward);
+        Gizmos.DrawLine(rayEnd, rayEnd + transform.up + -transform.forward);
+        Gizmos.DrawLine(rayEnd, rayEnd + -transform.up + -transform.forward);
     }
 
     private void Update() {
