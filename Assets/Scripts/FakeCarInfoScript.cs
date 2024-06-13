@@ -9,7 +9,7 @@ public class FakeCarInfoScript : MonoBehaviour
     [HideInInspector]
     public float speed;
 
-    private void Start()
+    private void Awake()
     {
         // Randomize the car's speed on startup
         speed = Random.Range(minSpeed, maxSpeed);
