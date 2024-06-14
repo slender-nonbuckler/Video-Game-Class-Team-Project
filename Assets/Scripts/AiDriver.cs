@@ -49,11 +49,11 @@ public class AiDriver : MonoBehaviour{
 
     private void SteerToMatchRotation(Transform other) {
         float steeringDotProduct = Vector3.Dot(transform.right, other.forward);
-        Debug.DrawLine(transform.position, transform.position + transform.right * steeringDotProduct * 10, Color.red);
+        Debug.DrawLine(transform.position, transform.position + transform.right * (steeringDotProduct * 10), Color.red);
         inputs.x = Mathf.Clamp(steeringDotProduct, -1f, 1f);
 
         float accelerationDotProduct = Vector3.Dot(transform.forward, other.forward);
-        Debug.DrawLine(transform.position, transform.position + transform.forward * accelerationDotProduct * 10, Color.red);
+        Debug.DrawLine(transform.position, transform.position + transform.forward * (accelerationDotProduct * 10), Color.red);
         float minAcceleration = 0.1f;
         float unsignedAcceleration = Mathf.Max(Mathf.Abs(accelerationDotProduct), minAcceleration);
         float signedAcceleration = unsignedAcceleration * Mathf.Sign(accelerationDotProduct);
