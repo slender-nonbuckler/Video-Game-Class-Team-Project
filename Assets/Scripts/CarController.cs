@@ -16,6 +16,7 @@ public class CarController : MonoBehaviour {
     [SerializeField] private float maxSteeringAngle;
     [SerializeField] private float selfRightingStrength = 0.5f;
     [SerializeField] private float selfRightingDamping = 0.5f;
+    [SerializeField] private float airSteeringStrength = 0.5f;
     
 
     [Header("Tire Settings")]
@@ -67,6 +68,9 @@ public class CarController : MonoBehaviour {
 
     void FixedUpdate() {
         ApplySelfRightingForce();
+        if (getIsGrounded() == false) {
+            ApplyAirSteering();
+        }
     }
 
     public void SetInputs(Vector2 inputs) {
@@ -129,5 +133,11 @@ public class CarController : MonoBehaviour {
         var springTorque = selfRightingStrength * Vector3.Cross(carRigidbody.transform.up, Vector3.up);
         var dampTorque = selfRightingDamping * -carRigidbody.angularVelocity;
         carRigidbody.AddTorque(springTorque + dampTorque, ForceMode.Acceleration);
+    }
+
+    private void ApplyAirSteering() {
+        Vector3 direction = Vector3.up;
+        Vector3 torque = direction * airSteeringStrength * inputs.x;
+        carRigidbody.AddTorque(torque, ForceMode.Acceleration);
     }
 }
