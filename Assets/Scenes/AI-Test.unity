@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18029168, g: 0.22572425, b: 0.30693048, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3746,6 +3746,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a760ea53a0e7b5fe978618a8c02a296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drivableLayers:
+    serializedVersion: 2
+    m_Bits: 51
   carRigidbody: {fileID: 1523214593094585675}
   tireComponents:
   - {fileID: 1523214593069439510}
@@ -3849,7 +3852,7 @@ MonoBehaviour:
   isShowingGripForce: 0
   isShowingSuspensionForce: 0
   isShowingTotalForces: 0
-  isShowingWheelContact: 0
+  isShowingWheelContact: 1
 --- !u!136 &1523214593094585678
 CapsuleCollider:
   m_ObjectHideFlags: 0
