@@ -321,6 +321,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a760ea53a0e7b5fe978618a8c02a296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drivableLayers:
+    serializedVersion: 2
+    m_Bits: 51
   carRigidbody: {fileID: 1523214592596717210}
   tireComponents:
   - {fileID: 1523214592638679495}
@@ -380,6 +383,7 @@ MonoBehaviour:
   maxSteeringAngle: 12.5
   selfRightingStrength: 0.5
   selfRightingDamping: 0.4
+  airSteeringStrength: 0.5
   tireRadius: 0.5
   tireMass: 0.25
   tireRollingDrag: 5
@@ -438,6 +442,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   carController: {fileID: 1523214592596717213}
   waypoints: []
+  target: {fileID: 0}
 --- !u!1 &1523214592638679489
 GameObject:
   m_ObjectHideFlags: 0

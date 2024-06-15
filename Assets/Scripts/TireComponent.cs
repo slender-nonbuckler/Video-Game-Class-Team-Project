@@ -5,7 +5,7 @@ using UnityEngine;
 public class TireComponent : MonoBehaviour {
     [Header("References")]
     [SerializeField] public Rigidbody rigidbodyAttachedTo;
-    [SerializeField] private LayerMask drivableLayers;
+    [SerializeField] public LayerMask drivableLayers;
     [SerializeField] private Transform tireVisual;
     [SerializeField] public float tireRadius;
 

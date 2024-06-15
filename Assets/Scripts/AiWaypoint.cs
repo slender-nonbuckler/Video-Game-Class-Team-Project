@@ -22,7 +22,7 @@ public class AiWaypoint : MonoBehaviour {
     }
 
     private void Update() {
-        if (pointTowards == null) {
+        if (!pointTowards) {
             return;
         }
 

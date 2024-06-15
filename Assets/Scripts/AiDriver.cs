@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,34 +6,77 @@ using UnityEngine;
 public class AiDriver : MonoBehaviour{
     [Header("References")]
     [SerializeField] private CarController carController;
-    private Vector2 inputs = Vector2.up * 1f;
     [SerializeField] private List<Transform> waypoints;
+    [SerializeField] private Transform target;
 
+    Vector2 INVALID_VECTOR2 = Vector2.positiveInfinity;
     void Start() {
-        GetWaypoints();
+        FindWaypoints();
+        FindStartTarget();
     }
 
     void Update() {
+        if (!carController) {
+            return;
+        }
+
+        List<Vector2> desiredInputs = new List<Vector2>();
+        
         Vector2 nearestWaypointInput = GetInputToMatchNearestWaypoint();
-        if (carController) {
-            carController.SetInputs(inputs);
+        if (!IsInfinity(nearestWaypointInput)) {
+            desiredInputs.Add(nearestWaypointInput);
+        }
+        
+        Vector2 nextTargetInput = GetInputToNextTarget();
+        if (!IsInfinity(nextTargetInput)) {
+            desiredInputs.Add(nextTargetInput);
+        }
+
+        if (desiredInputs.Count == 0) {
+            return;
+        }
+
+        Vector2 summedInputs = Vector2.zero;
+        foreach (Vector2 input in desiredInputs) {
+            summedInputs += input;
+        }
+        
+        carController.SetInputs(summedInputs / desiredInputs.Count);
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        AiTarget aiTarget = other.GetComponent<AiTarget>();
+        if (aiTarget) {
+            UpdateTarget(aiTarget);
         }
     }
 
-    private void GetWaypoints() {
+    private void FindWaypoints() {
         GameObject[] waypointGameObjects = GameObject.FindGameObjectsWithTag(AiWaypoint.TAG);
         foreach (GameObject waypoint in waypointGameObjects) {
             waypoints.Add(waypoint.transform);
         }
     }
 
+    private void FindStartTarget() {
+        GameObject[] targetGameObjects = GameObject.FindGameObjectsWithTag(AiTarget.START_TAG);
+        if (targetGameObjects == null) {
+            return;
+        }
+
+        target = targetGameObjects[0].transform;
+    }
+
     private Vector2 GetInputToMatchNearestWaypoint() {
         Transform nearestWaypoint = GetNearestWaypoint();
+        if (!nearestWaypoint) {
+            return INVALID_VECTOR2;
+        }
         return GetSteerToMatchRotation(nearestWaypoint);
     }
 
     private Transform GetNearestWaypoint() {
-        Transform nearest = transform;
+        Transform nearest = null;
         float minDistance = Mathf.Infinity;
 
         foreach (Transform waypoint in waypoints) {
@@ -59,5 +103,25 @@ public class AiDriver : MonoBehaviour{
         signedAcceleration = Mathf.Clamp(signedAcceleration, -1f, 1f);
 
         return new Vector2(steeringDotProduct, signedAcceleration);
+    }
+
+    private Vector2 GetInputToNextTarget() {
+        if (!target) {
+            return INVALID_VECTOR2;
+        }
+        
+        Vector3 directionToMove = (target.position - transform.position).normalized;
+        float steeringAngle = Vector3.SignedAngle(transform.forward, directionToMove, Vector3.up) / 90;
+        float acceleration = Vector3.Dot(transform.forward, directionToMove);
+
+        return new Vector2(steeringAngle, acceleration);
+    }
+
+    private void UpdateTarget(AiTarget aiTarget) {
+        target = aiTarget.GetNextTarget();
+    }
+
+    private bool IsInfinity(Vector2 vector) {
+        return float.IsInfinity(vector.x) && float.IsInfinity(vector.y);
     }
 }
