@@ -5,7 +5,7 @@ using UnityEngine;
 public class TireComponent : MonoBehaviour {
     [Header("References")]
     [SerializeField] public Rigidbody rigidbodyAttachedTo;
-    [SerializeField] private LayerMask drivableLayers;
+    [SerializeField] public LayerMask drivableLayers;
     [SerializeField] private Transform tireVisual;
     [SerializeField] public float tireRadius;
 
@@ -100,7 +100,7 @@ public class TireComponent : MonoBehaviour {
         float desiredVelocityChange = -slideVelocity * gripFactor;
         float desiredAcceleration = desiredVelocityChange / Time.fixedDeltaTime;
 
-        return transform.right * mass * desiredAcceleration;
+        return transform.right * (mass * desiredAcceleration);
     }
 
     private Vector3 GetRollForce(RaycastHit raycastHit) {
@@ -121,17 +121,17 @@ public class TireComponent : MonoBehaviour {
             }
             float availableTorque = torqueCurve.Evaluate(normalizedSpeed) * accelerationInput;
 
-            rollForce = accelerationDirection * availableTorque * maxSpeed;
+            rollForce = accelerationDirection * (availableTorque * maxSpeed);
         } else if (accelerationInput < 0.0f) {
             if (normalizedSpeed == 1f) {
                 return Vector3.zero;
             }
             float availableTorque = torqueCurve.Evaluate(normalizedSpeed) * accelerationInput;
 
-            rollForce = accelerationDirection * availableTorque * maxSpeed;
+            rollForce = accelerationDirection * (availableTorque * maxSpeed);
         } else {
             float normalizedSignedSpeed = Mathf.Clamp(rollVelocity / maxSpeed, -1f, 1f);
-            rollForce = -rigidbodyForward * rollDrag * normalizedSignedSpeed;
+            rollForce = -rigidbodyForward * (rollDrag * normalizedSignedSpeed);
         }
 
         return rollForce;
@@ -149,7 +149,7 @@ public class TireComponent : MonoBehaviour {
     }
 
     private void UpdateTireVisuals() {
-        if (tireVisual == null) {
+        if (!tireVisual) {
             return;
         }
 

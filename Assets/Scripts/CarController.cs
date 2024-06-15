@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CarController : MonoBehaviour {
-    [Header("References")]
+    [Header("References")] 
+    [SerializeField] private LayerMask drivableLayers;
     [SerializeField] private Rigidbody carRigidbody;
     [SerializeField] private TireComponent[] tireComponents;
     [SerializeField] private TireComponent[] steerableTireComponents;
@@ -104,6 +107,8 @@ public class CarController : MonoBehaviour {
 
     private void SyncTireComponentSettings() {
         foreach (TireComponent tireComponent in tireComponents) {
+            tireComponent.drivableLayers = drivableLayers;
+            
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
             tireComponent.torqueCurve = torqueCurve;
@@ -128,7 +133,7 @@ public class CarController : MonoBehaviour {
         }
     }
 
-    private Vector3 prevAngularVel = Vector3.zero;
+    
     private void ApplySelfRightingForce() {
         var springTorque = selfRightingStrength * Vector3.Cross(carRigidbody.transform.up, Vector3.up);
         var dampTorque = selfRightingDamping * -carRigidbody.angularVelocity;
@@ -137,7 +142,7 @@ public class CarController : MonoBehaviour {
 
     private void ApplyAirSteering() {
         Vector3 direction = Vector3.up;
-        Vector3 torque = direction * airSteeringStrength * inputs.x;
+        Vector3 torque = direction * (airSteeringStrength * inputs.x);
         carRigidbody.AddTorque(torque, ForceMode.Acceleration);
     }
 }
