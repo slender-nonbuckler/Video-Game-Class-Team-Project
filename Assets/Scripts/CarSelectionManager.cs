@@ -9,19 +9,22 @@ public class CarSelectionManager : MonoBehaviour
     public List<GameObject> carPrefabs;
     public TMPro.TextMeshProUGUI carInfoText;
     private int currentCarIndex = 0; 
-    private Vector3 carDisplayPosition = new Vector3(0f, 1.5f, 0f);
-    public float rotationSpeed = 45f;
+    private Vector3 carDisplayPosition = new Vector3(0f, 0.5f, 0f);
 
     void Start()
     {
         foreach (GameObject carPrefab in carPrefabs)
         {
             carPrefab.transform.position = new Vector3(-1000, 0, 0);
+            Rigidbody carRigidbody = carPrefab.GetComponent<Rigidbody>();
+            carRigidbody.isKinematic = true; // Disable physics so the car does not fall through the screen
         }
         //For the first car
         carPrefabs[0].transform.position = carDisplayPosition;
-        FakeCarInfoScript carInfo = carPrefabs[currentCarIndex].GetComponent<FakeCarInfoScript>();
-        carInfoText.text = "Speed: " + carInfo.speed;
+        CarController carInfo = carPrefabs[currentCarIndex].GetComponent<CarController>();
+        carInfoText.text = "Top Speed: " + carInfo.TopSpeed + "\n" +
+                    "Grip: " + carInfo.TireRadius + "\n" +
+                   "Handling: " + System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2);
         StartCoroutine(RotateCarPrefab(carPrefabs[0]));
     }
 
@@ -32,36 +35,35 @@ public class CarSelectionManager : MonoBehaviour
     }
     public void CycleCarPrefabs(bool isNextCar)
     {
-        StopCoroutine(RotateCarPrefab(carPrefabs[currentCarIndex]));
+        // Stop the current coroutine, this stops the cars from spinning faster when it is selected repeatedly
+        StopAllCoroutines();
 
-        // Move the current car prefab out of the camera's view
+        carPrefabs[currentCarIndex].transform.rotation = Quaternion.identity;
         carPrefabs[currentCarIndex].transform.position = new Vector3(-1000, 0, 0);
 
-        // Move to next car
         currentCarIndex = isNextCar ? (currentCarIndex + 1) % carPrefabs.Count : (currentCarIndex - 1 + carPrefabs.Count) % carPrefabs.Count;
 
-
         carPrefabs[currentCarIndex].transform.position = carDisplayPosition;
-        FakeCarInfoScript carInfo = carPrefabs[currentCarIndex].GetComponent<FakeCarInfoScript>();
-        carInfoText.text = "Speed: " + carInfo.speed;
+        CarController carInfo = carPrefabs[currentCarIndex].GetComponent<CarController>();
+        carInfoText.text = "Top Speed: " + carInfo.TopSpeed + "\n" +
+                    "Grip: " + carInfo.TireRadius + "\n" +
+                   "Handling: " + System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2);
 
         // Spin!
         StartCoroutine(RotateCarPrefab(carPrefabs[currentCarIndex]));
     }
     private IEnumerator RotateCarPrefab(GameObject carPrefab)
     {
-        float maxAnglePerSecond = 90f; 
+        float rotationSpeed = 150f; 
         float elapsedTime = 0f;
-        float targetAngle = 0f;
 
         while (true)
         {
-            
-            if (carPrefab.transform.position == carDisplayPosition)
+            if (Vector3.Distance(carPrefab.transform.position, carDisplayPosition) < 0.1f)
             {
                 elapsedTime += Time.deltaTime;
-                targetAngle = maxAnglePerSecond * elapsedTime;
-                carPrefab.transform.rotation = Quaternion.Euler(carPrefab.transform.rotation.eulerAngles.x, targetAngle, carPrefab.transform.rotation.eulerAngles.z);
+                float rotationAmount = rotationSpeed * Time.deltaTime;
+                carPrefab.transform.Rotate(Vector3.up, rotationAmount);
 
                 if (elapsedTime >= 4f)
                 {
@@ -71,6 +73,7 @@ public class CarSelectionManager : MonoBehaviour
             else
             {
                 elapsedTime = 0f;
+                carPrefab.transform.rotation = Quaternion.identity; // Reset rotation
             }
 
             yield return null;
@@ -79,7 +82,8 @@ public class CarSelectionManager : MonoBehaviour
     public void SelectCurrentCar()
     {
         GameObject selectedCarPrefab = carPrefabs[currentCarIndex];
-
+        Rigidbody carRigidbody = selectedCarPrefab.GetComponent<Rigidbody>();
+        carRigidbody.isKinematic = false; // Enable physics when selected
         // Ideally, this would go into some sort of state manager for the game
         // Then, cut to a new scene for the game
         Debug.Log("Selected Car: " + selectedCarPrefab.name);
