@@ -82,8 +82,13 @@ public class CarSelectionManager : MonoBehaviour
     public void SelectCurrentCar()
     {
         GameObject selectedCarPrefab = carPrefabs[currentCarIndex];
-        Rigidbody carRigidbody = selectedCarPrefab.GetComponent<Rigidbody>();
-        carRigidbody.isKinematic = false; // Enable physics when selected
+        foreach (GameObject carPrefab in carPrefabs)
+        {
+            carPrefab.transform.position = new Vector3(-1000, 0, 0);
+            Rigidbody carRigidbody = carPrefab.GetComponent<Rigidbody>();
+            carRigidbody.isKinematic = false;  //Re-enable all rigidbodies
+        }
+        
         // Ideally, this would go into some sort of state manager for the game
         // Then, cut to a new scene for the game
         Debug.Log("Selected Car: " + selectedCarPrefab.name);
