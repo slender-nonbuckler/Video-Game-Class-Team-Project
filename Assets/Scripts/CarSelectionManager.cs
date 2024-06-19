@@ -10,6 +10,7 @@ public class CarSelectionManager : MonoBehaviour
     public TMPro.TextMeshProUGUI carInfoText;
     private int currentCarIndex = 0; 
     private Vector3 carDisplayPosition = new Vector3(0f, 0.5f, 0f);
+    public GameObject uiCanvas;
 
     void Start()
     {
@@ -52,9 +53,11 @@ public class CarSelectionManager : MonoBehaviour
         // Spin!
         StartCoroutine(RotateCarPrefab(carPrefabs[currentCarIndex]));
     }
+
+
     private IEnumerator RotateCarPrefab(GameObject carPrefab)
     {
-        float rotationSpeed = 150f; 
+        float rotationSpeed = 150f;
         float elapsedTime = 0f;
 
         while (true)
@@ -73,7 +76,6 @@ public class CarSelectionManager : MonoBehaviour
             else
             {
                 elapsedTime = 0f;
-                carPrefab.transform.rotation = Quaternion.identity; // Reset rotation
             }
 
             yield return null;
@@ -82,15 +84,26 @@ public class CarSelectionManager : MonoBehaviour
     public void SelectCurrentCar()
     {
         GameObject selectedCarPrefab = carPrefabs[currentCarIndex];
-        foreach (GameObject carPrefab in carPrefabs)
+ 
+            
+        Rigidbody carRigidbody = selectedCarPrefab.GetComponent<Rigidbody>();
+        carRigidbody.isKinematic = false;
+
+        uiCanvas.gameObject.SetActive(false);
+        PlayerPrefs.SetString("SelectedCarPrefab", selectedCarPrefab.name);
+        StartCoroutine(WaitForCarToFallOutOfScreen(selectedCarPrefab));
+    }
+    private IEnumerator WaitForCarToFallOutOfScreen(GameObject carPrefab)
+    {
+        Quaternion originalRotation = carPrefab.transform.rotation;
+        float fallThreshold = -10f; 
+
+        while (carPrefab.transform.position.y > fallThreshold)
         {
-            carPrefab.transform.position = new Vector3(-1000, 0, 0);
-            Rigidbody carRigidbody = carPrefab.GetComponent<Rigidbody>();
-            carRigidbody.isKinematic = false;  //Re-enable all rigidbodies
+            yield return null;
         }
-        
-        // Ideally, this would go into some sort of state manager for the game
-        // Then, cut to a new scene for the game
-        Debug.Log("Selected Car: " + selectedCarPrefab.name);
+        carPrefab.transform.rotation = originalRotation;
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
     }
 }
