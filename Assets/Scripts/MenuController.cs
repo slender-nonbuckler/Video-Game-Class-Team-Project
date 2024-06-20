@@ -7,7 +7,8 @@ public class MenuController : MonoBehaviour
 {
     private DataPersistentManager dataPersistenceManager;
     private GameData gameData;
-    void Start()
+   
+   void Start()
     {
         dataPersistenceManager = FindObjectOfType<DataPersistentManager>();
         if (dataPersistenceManager == null)
@@ -17,6 +18,8 @@ public class MenuController : MonoBehaviour
     }
     public void StartButton()
     {   
+        DataPersistentManager.instance.SetShouldLoadGame();
+        //DataPersistentManager.instance.NewGame();
         SceneManager.LoadScene(1);
         
     }
@@ -30,9 +33,10 @@ public class MenuController : MonoBehaviour
     {
         if (dataPersistenceManager != null)
         {
-            dataPersistenceManager.LoadGame();
+            
+            DataPersistentManager.instance.LoadGame();
+            Debug.LogError(dataPersistenceManager.shouldLoadGame);
         }
-        
         SceneManager.LoadScene(1);
     }
     
