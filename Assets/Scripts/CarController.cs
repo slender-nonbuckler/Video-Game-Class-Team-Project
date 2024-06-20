@@ -43,17 +43,6 @@ public class CarController : MonoBehaviour {
     private Vector2 inputs = Vector2.zero;
     private float startHeight;
 
-
-    //Getters for car selection information display
-    public float TopSpeed => topSpeed;
-    public float MaxSteeringAngle => maxSteeringAngle;
-    public float TireRadius => tireRadius;
-    public float TireMass => tireMass;
-    public float TireRollingDrag => tireRollingDrag;
-    public float RestDistance => restDistance;
-    public float Strength => strength;
-    public float Damping => damping;
-
     void Start() {
         SyncTireComponentSettings();
 
