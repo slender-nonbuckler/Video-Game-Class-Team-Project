@@ -104,6 +104,6 @@ public class CarSelectionManager : MonoBehaviour
         }
         carPrefab.transform.rotation = originalRotation;
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("TutorialScene");
     }
 }

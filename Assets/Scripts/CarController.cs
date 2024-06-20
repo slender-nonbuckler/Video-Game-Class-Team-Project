@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CarController : MonoBehaviour {
+public class CarController : MonoBehaviour
+{
     [Header("References")]
     [SerializeField] private Rigidbody carRigidbody;
     [SerializeField] private TireComponent[] tireComponents;
@@ -17,20 +18,20 @@ public class CarController : MonoBehaviour {
     [SerializeField] private float selfRightingStrength = 0.5f;
     [SerializeField] private float selfRightingDamping = 0.5f;
     [SerializeField] private float airSteeringStrength = 0.5f;
-    
+
 
     [Header("Tire Settings")]
     [SerializeField] private float tireRadius;
     [SerializeField] private float tireMass;
     [SerializeField] private float tireRollingDrag;
     [SerializeField] private AnimationCurve tireGripCurve;
-    
-    
+
+
     [Header("Suspension Settings")]
     [SerializeField] private float restDistance;
     [SerializeField] private float strength;
     [SerializeField] private float damping;
-    
+
 
 
     [Header("Force Visual Settings")]
@@ -54,43 +55,54 @@ public class CarController : MonoBehaviour {
     public float Strength => strength;
     public float Damping => damping;
 
-    void Start() {
+    void Start()
+    {
         SyncTireComponentSettings();
 
-        if (centerOfMass != null) {
+        if (centerOfMass != null)
+        {
             carRigidbody.centerOfMass = centerOfMass.localPosition;
         }
 
         startHeight = transform.position.y;
     }
 
-    void Update() {
-        foreach (TireComponent tireComponent in tireComponents) {
+    void Update()
+    {
+        foreach (TireComponent tireComponent in tireComponents)
+        {
             //Debug.Log("Setting Tire Inputs: " + inputs);
             tireComponent.SetInputs(inputs);
         }
 
-        if (Input.GetButtonDown("Jump")) {
+        if (Input.GetButtonDown("Jump"))
+        {
             Reset();
         }
 
         UpdateForceVisualSettings();
     }
 
-    void FixedUpdate() {
+    void FixedUpdate()
+    {
         ApplySelfRightingForce();
-        if (getIsGrounded() == false) {
+        if (getIsGrounded() == false)
+        {
             ApplyAirSteering();
         }
     }
 
-    public void SetInputs(Vector2 inputs) {
+    public void SetInputs(Vector2 inputs)
+    {
         this.inputs = inputs;
     }
 
-    private bool getIsGrounded() {
-        foreach (TireComponent tireComponent in tireComponents) {
-            if (tireComponent.IsGrounded()) {
+    private bool getIsGrounded()
+    {
+        foreach (TireComponent tireComponent in tireComponents)
+        {
+            if (tireComponent.IsGrounded())
+            {
                 return true;
             }
         }
@@ -98,13 +110,16 @@ public class CarController : MonoBehaviour {
         return false;
     }
 
-    private void Reset() {
+    private void Reset()
+    {
         transform.position = new Vector3(transform.position.x, startHeight, transform.position.z);
         transform.rotation = Quaternion.LookRotation(transform.forward);
     }
 
-    private void UpdateForceVisualSettings() {
-        foreach (TireComponent tireComponent in tireComponents) {
+    private void UpdateForceVisualSettings()
+    {
+        foreach (TireComponent tireComponent in tireComponents)
+        {
             tireComponent.isShowingGripForce = isShowingGripForce;
             tireComponent.isShowingRollForce = isShowingRollForce;
             tireComponent.isShowingSuspensionForce = isShowingSuspensionForce;
@@ -113,8 +128,10 @@ public class CarController : MonoBehaviour {
         }
     }
 
-    private void SyncTireComponentSettings() {
-        foreach (TireComponent tireComponent in tireComponents) {
+    private void SyncTireComponentSettings()
+    {
+        foreach (TireComponent tireComponent in tireComponents)
+        {
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
             tireComponent.torqueCurve = torqueCurve;
@@ -130,23 +147,27 @@ public class CarController : MonoBehaviour {
             tireComponent.damping = damping;
         }
 
-        foreach (TireComponent tireComponent in steerableTireComponents) {
+        foreach (TireComponent tireComponent in steerableTireComponents)
+        {
             tireComponent.isSteerable = true;
         }
 
-        foreach (TireComponent tireComponent in drivetrainTireComponents) {
+        foreach (TireComponent tireComponent in drivetrainTireComponents)
+        {
             tireComponent.isPartOfDrivetrain = true;
         }
     }
 
     private Vector3 prevAngularVel = Vector3.zero;
-    private void ApplySelfRightingForce() {
+    private void ApplySelfRightingForce()
+    {
         var springTorque = selfRightingStrength * Vector3.Cross(carRigidbody.transform.up, Vector3.up);
         var dampTorque = selfRightingDamping * -carRigidbody.angularVelocity;
         carRigidbody.AddTorque(springTorque + dampTorque, ForceMode.Acceleration);
     }
 
-    private void ApplyAirSteering() {
+    private void ApplyAirSteering()
+    {
         Vector3 direction = Vector3.up;
         Vector3 torque = direction * airSteeringStrength * inputs.x;
         carRigidbody.AddTorque(torque, ForceMode.Acceleration);
