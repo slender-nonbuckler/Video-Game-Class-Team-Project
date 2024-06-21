@@ -13,7 +13,7 @@ public class TutorialCarController : MonoBehaviour
     void Start()
     {
         string selectedCarPrefabName = PlayerPrefs.GetString("SelectedCarPrefab");
-        selectedCar = InstantiateSelectedCar(selectedCarPrefabName, new Vector3(17f, 0f, -4.6f));
+        selectedCar = InstantiateSelectedCar(selectedCarPrefabName, new Vector3(0f, 10f, 0f));
         SetUpDriver(selectedCar);
     }
 

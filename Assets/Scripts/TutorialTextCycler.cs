@@ -22,10 +22,16 @@ public class TutorialTextCycler : MonoBehaviour
         "To reverse, press S",
         "Different cars have different handling",
         "Some cars can tip over faster than others",
-        "If you find that your car has tipped", 
+        "Try driving between the cones",
+        "If you find that your car has tipped",
         "Just hold on! It'll right itself in a bit",
-        "Drive carefully!"
-    }; 
+        "Drive carefully!",
+        "Sometimes, the car may get stuck",
+        "When this happens, press on the Spacebar to reset your car",
+        "Look around for a ramp!",
+        "Try driving on it and see how the car handles in the air",
+        ""
+    };
 
     private int currentLineIndex = 0;
 
