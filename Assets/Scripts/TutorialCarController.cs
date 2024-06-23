@@ -23,7 +23,9 @@ public class TutorialCarController : MonoBehaviour
         {
             if (prefab.name == prefabName)
             {
-                return Instantiate(prefab, position, prefab.transform.rotation);
+                GameObject car = Instantiate(prefab, position, prefab.transform.rotation);
+                car.tag = "Player";
+                return car;
             }
         }
         return null;
