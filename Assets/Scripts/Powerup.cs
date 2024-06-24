@@ -1,4 +1,3 @@
-// Powerup.cs
 using UnityEngine;
 using System.Collections;
 
@@ -9,16 +8,61 @@ public class Powerup : MonoBehaviour
     private static float cooldownTime = 1f; // 1 second cooldown
     private static float lastCollectionTime = -1f;
     [SerializeField] private float spinSpeed = 180f;
+    [SerializeField] private float colorChangeSpeed = 1f;
+    private Renderer powerupRenderer;
+    private Material powerupMaterial;
+    private float hue = 0f;
 
     private void Start()
     {
         AssignRandomPowerup();
+        InitializeRenderer();
     }
+
     private void Update()
     {
         transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime);
+        UpdateColor();
     }
+    private void UpdateColor()
+    {
+        if (powerupMaterial != null)
+        {
+            hue += colorChangeSpeed * Time.deltaTime;
+            if (hue > 1f) hue -= 1f;
+            Color newColor = Color.HSVToRGB(hue, 1f, 1f);
+            powerupMaterial.color = newColor;
+        }
+    }
+    private void InitializeRenderer()
+    {
+        powerupRenderer = GetComponent<Renderer>();
+        if (powerupRenderer == null)
+        {
+            // If not found on this GameObject, look in children
+            powerupRenderer = GetComponentInChildren<Renderer>();
+            if (powerupRenderer == null)
+            {
+                Debug.LogError($"Powerup {gameObject.name}: No Renderer component found on this GameObject or its children");
+                return;
+            }
+            else
+            {
+                Debug.Log($"Powerup {gameObject.name}: Renderer found on child object: {powerupRenderer.gameObject.name}");
+            }
+        }
 
+        if (powerupRenderer.sharedMaterial == null)
+        {
+            Debug.LogError($"Powerup {gameObject.name}: Renderer has no material assigned");
+            return;
+        }
+
+        // Create a material instance to avoid changing shared materials
+        powerupMaterial = new Material(powerupRenderer.sharedMaterial);
+        powerupRenderer.material = powerupMaterial;
+        Debug.Log($"Powerup {gameObject.name}: Renderer and material initialized successfully");
+    }
     private void AssignRandomPowerup()
     {
         if (PowerupManager.Instance == null)
@@ -57,15 +101,33 @@ public class Powerup : MonoBehaviour
         }
         carController.AddActivePowerup(powerupInfo);
         powerupInfo.applyEffect(carController);
+        Debug.Log($"Powerup {gameObject.name}: Applied effect. Duration: {powerupInfo.duration}");
     }
 
     private IEnumerator DeactivateAfterDelay()
     {
-        Debug.Log($"Powerup {gameObject.name}: Deactivating visuals");
-        GetComponent<Renderer>().enabled = false;
-        GetComponent<Collider>().enabled = false;
-        yield return new WaitForSeconds(0.1f); // Short delay before destroying
-        Debug.Log($"Powerup {gameObject.name}: Destroying gameObject");
-        Destroy(gameObject);
+        Debug.Log($"Powerup {gameObject.name}: Starting DeactivateAfterDelay coroutine");
+        if (powerupRenderer != null)
+        {
+            powerupRenderer.enabled = false;
+            Debug.Log($"Powerup {gameObject.name}: Disabled Renderer");
+        }
+        else
+        {
+            Debug.LogWarning($"Powerup {gameObject.name}: No Renderer component found");
+        }
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            collider.enabled = false;
+            Debug.Log($"Powerup {gameObject.name}: Disabled Collider");
+        }
+        else
+        {
+            Debug.LogWarning($"Powerup {gameObject.name}: No Collider component found");
+        }
+        yield return new WaitForSeconds(0.1f); // Short delay before deactivating
+        Debug.Log($"Powerup {gameObject.name}: Deactivating gameObject");
+        gameObject.SetActive(false);
     }
 }
