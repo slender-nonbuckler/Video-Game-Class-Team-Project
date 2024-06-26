@@ -39,8 +39,8 @@ public class PowerupManager : MonoBehaviour
 
     private void InitializePowerups()
     {
-        // Speed Boost (unchanged)
-        availablePowerups.Add(new PowerupInfo
+        // Speed Boost
+/*        availablePowerups.Add(new PowerupInfo
         {
             name = "Speed Boost",
             duration = 5f,
@@ -58,7 +58,7 @@ public class PowerupManager : MonoBehaviour
                 powerupText.text = "";
                 Debug.Log($"PowerupManager: Speed after reset: {car.TopSpeed}");
             }
-        });
+        });*/
 
         // Size Increase
         availablePowerups.Add(new PowerupInfo
@@ -67,14 +67,10 @@ public class PowerupManager : MonoBehaviour
             duration = 7f,
             applyEffect = (car) =>
             {
-                powerupText.text = "Size increase buff applied!";
-                Debug.Log($"PowerupManager: Applying size increase. Current scale: {car.transform.localScale}");
                 StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 2f, 0.5f));
             },
             removeEffect = (car) =>
             {
-                powerupText.text = "";
-                Debug.Log($"PowerupManager: Removing size increase. Current scale: {car.transform.localScale}");
                 StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 0.5f, 0.5f));
             }
         });
@@ -86,14 +82,10 @@ public class PowerupManager : MonoBehaviour
             duration = 7f,
             applyEffect = (car) =>
             {
-                powerupText.text = "Size decrease debuff applied!";
-                Debug.Log($"PowerupManager: Applying size decrease. Current scale: {car.transform.localScale}");
                 StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 0.5f, 0.5f));
             },
             removeEffect = (car) =>
             {
-                powerupText.text = "";
-                Debug.Log($"PowerupManager: Removing size decrease. Current scale: {car.transform.localScale}");
                 StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 2f, 0.5f));
             }
         });
@@ -104,17 +96,13 @@ public class PowerupManager : MonoBehaviour
             duration = 10f,
             applyEffect = (car) =>
             {
-                powerupText.text = "Your car has transformed into a race car!";
                 StartCoroutine(SwitchCarCoroutine(car));
             },
             removeEffect = (car) =>
             {
-               
+                
             }
         });
-
-
-        Debug.Log($"PowerupManager: Initialized {availablePowerups.Count} powerups");
     }
     private IEnumerator SwitchCarCoroutine(CarController currentCar)
     {
@@ -131,7 +119,6 @@ public class PowerupManager : MonoBehaviour
         GameObject newCarPrefab = GetRandomDifferentCarPrefab(currentCarPrefabName);
         if (newCarPrefab == null)
         {
-            Debug.LogError("PowerupManager: No alternative car prefab found!");
             yield break;
         }
 
@@ -150,8 +137,6 @@ public class PowerupManager : MonoBehaviour
 
         // Disable the original car
         originalCar.SetActive(false);
-
-        Debug.Log($"PowerupManager: Switched to new car: {newCar.name}");
 
         // Wait for the duration of the powerup
         yield return new WaitForSeconds(10f);
@@ -179,8 +164,6 @@ public class PowerupManager : MonoBehaviour
         // Deactivate and destroy the temporary car
         newCar.SetActive(false);
         Destroy(newCar);
-
-        Debug.Log("PowerupManager: Reverted to original car");
     }
 
     private GameObject GetRandomDifferentCarPrefab(string currentCarPrefabName)
@@ -226,7 +209,6 @@ public class PowerupManager : MonoBehaviour
         }
 
         target.localScale = endScale; // Ensure we end up at the exact desired scale
-        Debug.Log($"PowerupManager: Scaling complete. New scale: {target.localScale}");
     }
 
     public PowerupInfo GetRandomPowerup()
@@ -234,10 +216,8 @@ public class PowerupManager : MonoBehaviour
         if (availablePowerups.Count > 0)
         {
             int randomIndex = Random.Range(0, availablePowerups.Count);
-            Debug.Log($"PowerupManager: Returning random powerup: {availablePowerups[randomIndex].name}");
             return availablePowerups[randomIndex];
         }
-        Debug.LogError("PowerupManager: No powerups available!");
         return null;
     }
 }
