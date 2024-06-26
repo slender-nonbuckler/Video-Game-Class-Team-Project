@@ -19,8 +19,6 @@ public class DataPersistentManager : MonoBehaviour
     public static DataPersistentManager instance { get; private set;}
     private void Awake()
     {   
-         
-
         //should only be one persistent manager 
         if (instance != null)
         {
@@ -41,10 +39,14 @@ public class DataPersistentManager : MonoBehaviour
     {
         this.dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
         this.dataPersistenceObjects = FindAllDataPersistenceObjects(); 
-        if(shouldLoadGame)LoadGame();
-        
-        
-        
+        if(shouldLoadGame)
+        { 
+            LoadGame();
+        }
+        else {
+            NewGame();
+        }
+         
     }
     
     
@@ -56,7 +58,7 @@ public class DataPersistentManager : MonoBehaviour
         {
             dataPersistenceObj.LoadData(gameData);
         }
-        Debug.Log(gameData==null);
+        Debug.Log("new game" + gameData==null);
         
     }
     public void LoadGame()
@@ -68,7 +70,7 @@ public class DataPersistentManager : MonoBehaviour
         {
             Debug.Log("No data was found. A New Game needs to be started before data can be loaded.");
             NewGame();
-            Debug.Log(gameData.Score);
+            
         }
        
         foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
@@ -114,7 +116,7 @@ public class DataPersistentManager : MonoBehaviour
         return new List<IDataPersistence>(dataPersistenceObjects);
     }
    
-    public void SetShouldLoadGame()
+    public void SetShouldntLoadGame()
     {
         shouldLoadGame = false;
     }

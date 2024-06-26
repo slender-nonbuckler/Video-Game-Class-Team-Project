@@ -9,7 +9,8 @@ public class MenuController : MonoBehaviour
     private GameData gameData;
    
    void Start()
-    {
+    {   
+        
         dataPersistenceManager = FindObjectOfType<DataPersistentManager>();
         if (dataPersistenceManager == null)
         {
@@ -18,11 +19,13 @@ public class MenuController : MonoBehaviour
     }
     public void StartButton()
     {   
-        DataPersistentManager.instance.SetShouldLoadGame();
-        //DataPersistentManager.instance.NewGame();
+        PlayerPrefs.SetInt("NewGame", 1);
+        //DataPersistentManager.instance.SetShouldntLoadGame();
+        DataPersistentManager.instance.NewGame();
         SceneManager.LoadScene(1);
-        
+       
     }
+
     public void QuitButton()
     {
         Application.Quit();
@@ -32,12 +35,16 @@ public class MenuController : MonoBehaviour
     public void ContinueButton()
     {
         if (dataPersistenceManager != null)
-        {
+        {   
             
             DataPersistentManager.instance.LoadGame();
             Debug.LogError(dataPersistenceManager.shouldLoadGame);
         }
         SceneManager.LoadScene(1);
+    }
+     public void DeactivateMenu() 
+    {
+        this.gameObject.SetActive(false);
     }
     
 

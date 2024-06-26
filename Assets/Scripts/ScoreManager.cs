@@ -38,7 +38,7 @@ public class ScoreManager : MonoBehaviour, IDataPersistence
     public void LoadData(GameData data) 
     {
         
-        Debug.Log("loaded in score" + data.Score);
+        
         this.score = data.Score;
     }
 
