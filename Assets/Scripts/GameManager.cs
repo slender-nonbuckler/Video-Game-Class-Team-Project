@@ -15,4 +15,11 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetInt("NewGame", 0); // Reset the value
         }
     }
+
+   
+    private void OnApplicationQuit()
+    {
+        targetGameObject.SetActive(true);
+        DataPersistentManager.instance.SaveGame();
+    }
 }
