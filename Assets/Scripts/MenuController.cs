@@ -5,12 +5,47 @@ using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour
 {
-    public void StartButton()
-    {
-        SceneManager.LoadScene("CarSelection");
+    private DataPersistentManager dataPersistenceManager;
+    private GameData gameData;
+   
+   void Start()
+    {   
+        
+        dataPersistenceManager = FindObjectOfType<DataPersistentManager>();
+        if (dataPersistenceManager == null)
+        {
+            Debug.LogError("DataPersistenceManager not found in the scene.");
+        }
     }
+    public void StartButton()
+    {   
+        PlayerPrefs.SetInt("NewGame", 1);
+        //DataPersistentManager.instance.SetShouldntLoadGame();
+        DataPersistentManager.instance.NewGame();
+        SceneManager.LoadScene(1);
+       
+    }
+
     public void QuitButton()
     {
         Application.Quit();
     }
+   
+
+    public void ContinueButton()
+    {
+        if (dataPersistenceManager != null)
+        {   
+            
+            DataPersistentManager.instance.LoadGame();
+            Debug.LogError(dataPersistenceManager.shouldLoadGame);
+        }
+        SceneManager.LoadScene(1);
+    }
+     public void DeactivateMenu() 
+    {
+        this.gameObject.SetActive(false);
+    }
+    
+
 }
