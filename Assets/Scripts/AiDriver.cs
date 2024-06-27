@@ -28,6 +28,7 @@ public class AiDriver : MonoBehaviour{
         }
         
         Vector2 nextTargetInput = GetInputToNextTarget();
+        Debug.Log(nextTargetInput);
         if (!IsInfinity(nextTargetInput)) {
             desiredInputs.Add(nextTargetInput);
         }
