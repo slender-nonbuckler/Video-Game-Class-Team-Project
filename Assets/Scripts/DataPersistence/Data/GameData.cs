@@ -6,18 +6,41 @@ public class GameData
 {   
     public int Score;
     public int Money;
-    //public Car car;     
-    //Not sure if we will have a car class. 
+    public List<string> UnlockedCars;
 
-
-    //The value defined here is the default values 
-    //a new game starts with when there's no data to load
+    public int getScore { get { return Score; } }
+    public int getMoney { get { return Money; } }
+    public List<string> getUnlockedCars { get { return UnlockedCars; } }
 
     public GameData()
     {
         this.Score = 0;
-        this.Money = 0;  //We may give the player a startup money to buy some parts.
-
+        this.Money = 0;
+        //Player only gets the three bad cars
+        this.UnlockedCars = new List<string> { "Ambulance", "DeliveryTruck", "FireTruck" };
     }
 
+
+
+    public void UnlockCar(string car)
+    {
+        if(!this.UnlockedCars.Contains(car))
+        {
+            this.UnlockedCars.Add(car);
+        }
+    }
+    public bool IsCarUnlocked(string car)
+    {
+        return this.UnlockedCars.Contains(car);
+    }
+
+    public void SetScore(int newScore)
+    {
+        this.Score = newScore;
+    }
+
+    public void SetMoney(int newMoney)
+    {
+        this.Money = newMoney;
+    }
 }
