@@ -7,117 +7,108 @@ using UnityEngine.SceneManagement;
 public class DataPersistentManager : MonoBehaviour
 {
     [Header("Debugging")]
-    [SerializeField] public bool shouldLoadGame = true;
-   
+    [SerializeField] private bool initializeDataIfNull = true;
     [Header("File Storage Config")]
     [SerializeField] private string fileName = "Save.json";
     private GameData gameData;
     private List<IDataPersistence> dataPersistenceObjects;
     private FileDataHandler dataHandler;
+    public static DataPersistentManager instance { get; private set; }
 
-    //can only modify the instance in this class
-    public static DataPersistentManager instance { get; private set;}
     private void Awake()
-    {   
-        //should only be one persistent manager 
+    {
         if (instance != null)
         {
-            Debug.LogError("Found more than one Data Persistence Manager in the scene.");
             Destroy(this.gameObject);
+            return;
         }
         instance = this;
-        DontDestroyOnLoad(this.gameObject);
-        if (!shouldLoadGame) 
+        if (transform.parent != null)
         {
-            Debug.LogWarning("Data Persistence is currently disabled!");
+            Debug.LogWarning("Don't put DataPersistentManager as a child of another object. It'll destroy the parent and make it an orphan.");
+            transform.SetParent(null);
         }
-
-        
-    }
-    
-     private void Start()
-    {
+        DontDestroyOnLoad(this.gameObject);
         this.dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
-        this.dataPersistenceObjects = FindAllDataPersistenceObjects(); 
-        if(shouldLoadGame)
-        { 
-            LoadGame();
-        }
-        else {
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        this.dataPersistenceObjects = FindAllDataPersistenceObjects();
+        LoadGame();
+    }
+
+    public void LoadGame()
+    {
+        //Fallback if player clicks "Continue" but there's no saved file, probably should disable the button
+        this.gameData = dataHandler.Load();
+        if (this.gameData == null)
+        {
             NewGame();
         }
-         
+        else
+        {
+            Debug.Log($"Loaded game data: {gameData.DebugString()}");
+        }
+        foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
+        {
+            dataPersistenceObj.LoadData(gameData);
+        }
     }
-    
-    
-    
+
     public void NewGame()
     {
         this.gameData = new GameData();
-        foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
-        {
-            dataPersistenceObj.LoadData(gameData);
-        }
-        Debug.Log("new game" + gameData==null);
-        
+        SaveGame();
     }
-    public void LoadGame()
-    {   
-        this.gameData = dataHandler.Load();
-         // start a new game if the data is null and we're configured to initialize data for debugging purposes
 
-         if (this.gameData == null) 
-        {
-            Debug.Log("No data was found. A New Game needs to be started before data can be loaded.");
-            NewGame();
-            
-        }
-       
-        foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
-        {
-            dataPersistenceObj.LoadData(gameData);
-        }
-        
-        
-    }
     public void SaveGame()
-    {   
-        
-        // if we don't have any data to save, log a warning here
-        if (this.gameData == null) 
+    {
+        if (this.gameData == null)
         {
-            Debug.LogWarning("No data was found. A New Game needs to be started before data can be saved.");
-            
-            return;
+            NewGame();
         }
-        
-        foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
+        else
         {
-            dataPersistenceObj.SaveData(ref gameData);
+            foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
+            {
+                dataPersistenceObj.SaveData(ref gameData);
+            }
+            dataHandler.Save(gameData);
+            Debug.Log($"Saved game data: {gameData.DebugString()}");
         }
-
-        dataHandler.Save(gameData);
-        Debug.Log("points = " + gameData.Score);
     }
-    /**
-    AutoSave when you exit the game. 
-    */
+
     private void OnApplicationQuit()
     {
         SaveGame();
     }
-    public bool HasGameData() 
-    {
-        return gameData != null;
-    }
-     private List<IDataPersistence> FindAllDataPersistenceObjects()
+
+    private List<IDataPersistence> FindAllDataPersistenceObjects()
     {
         IEnumerable<IDataPersistence> dataPersistenceObjects = FindObjectsOfType<MonoBehaviour>().OfType<IDataPersistence>();
         return new List<IDataPersistence>(dataPersistenceObjects);
     }
-   
-    public void SetShouldntLoadGame()
+
+    public bool HasGameData()
     {
-        shouldLoadGame = false;
+        return dataHandler.FileExists();
+    }
+
+    public void StartNewGame()
+    {
+        NewGame();
+        //Assuming it'll always go back to this scene for now
+        SceneManager.LoadScene("CarSelection");
     }
 }

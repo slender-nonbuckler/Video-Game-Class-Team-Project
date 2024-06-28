@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CarSelectionManager : MonoBehaviour, IDataPersistence
 {
-    public List<GameObject> allCarPrefabs; // All available car prefabs
-    private List<GameObject> unlockedCarPrefabs; // Only unlocked car prefabs
+    public List<GameObject> allCarPrefabs; // Remember to add all unlockable prefabs to this
+    private List<GameObject> unlockedCarPrefabs; // The only ones the player has
     public TMPro.TextMeshProUGUI carInfoText;
     private int currentCarIndex = 0;
     private Vector3 carDisplayPosition = new Vector3(0f, 0.5f, 0f);
@@ -16,31 +17,41 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
 
     void Start()
     {
+        Debug.Log("CarSelectionManager Start");
         unlockedCarPrefabs = new List<GameObject>();
-        if (gameData == null)
-        {
-            gameData = new GameData();
-        }
-        UpdateUnlockedCars();
         SetupCars();
-        DisplayCurrentCar();
+
+        if (DataPersistentManager.instance != null)
+        {
+            DataPersistentManager.instance.LoadGame();
+        }
+        else
+        {
+            Debug.LogError("DataPersistentManager not found");
+        }
     }
 
     public void LoadData(GameData data)
     {
+        Debug.Log($"CarSelectionManager LoadData: {data.DebugString()}");
         this.gameData = data;
         UpdateUnlockedCars();
-        SetupCars();
         DisplayCurrentCar();
     }
 
     public void SaveData(ref GameData data)
     {
-        // We don't need to save anything in this class
+        // For the interface, doesn't need anything here
     }
 
     private void UpdateUnlockedCars()
     {
+        if (gameData == null)
+        {
+            Debug.LogError("GameData is null in UpdateUnlockedCars");
+            return;
+        }
+
         unlockedCarPrefabs.Clear();
         foreach (GameObject carPrefab in allCarPrefabs)
         {
@@ -49,7 +60,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
                 unlockedCarPrefabs.Add(carPrefab);
             }
         }
-        Debug.Log($"Unlocked cars: {unlockedCarPrefabs.Count}");
+        Debug.Log($"Updated unlocked cars: {unlockedCarPrefabs.Count}. Names: {string.Join(", ", unlockedCarPrefabs.Select(c => c.name))}");
     }
 
     private void SetupCars()
@@ -85,7 +96,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         else
         {
             carInfoText.text = "No cars unlocked!";
-            Debug.LogWarning("No cars are unlocked. Check if GameData is loaded correctly and car names match.");
+            //Debug.LogWarning("No cars are unlocked. Check if GameData is loaded correctly and car names match.");
         }
     }
 
@@ -100,7 +111,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         else
         {
             carInfoText.text = "Car info not available";
-            Debug.LogWarning("CarController component not found on the current car prefab.");
+            //Debug.LogWarning("CarController component not found on the current car prefab.");
         }
     }
 

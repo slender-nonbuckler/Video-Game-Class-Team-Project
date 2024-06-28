@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +22,10 @@ public class GameData
     }
 
 
-
+    public string DebugString()
+    {
+        return $"Score: {Score}, Money: {Money}, Unlocked Cars: {string.Join(", ", UnlockedCars)}";
+    }
     public void UnlockCar(string car)
     {
         if(!this.UnlockedCars.Contains(car))
@@ -43,4 +47,5 @@ public class GameData
     {
         this.Money = newMoney;
     }
+
 }
