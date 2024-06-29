@@ -6642,7 +6642,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 930e281eaccede247a8548a2d87c4e40, type: 2}
     - target: {fileID: 2737144932414670074, guid: e89e213f74de8514ca5ca397515a704c, type: 3}
       propertyPath: m_Name
-      value: powerup1
+      value: powerup
       objectReference: {fileID: 0}
     - target: {fileID: 6218305447236352335, guid: e89e213f74de8514ca5ca397515a704c, type: 3}
       propertyPath: colorChangeSpeed
