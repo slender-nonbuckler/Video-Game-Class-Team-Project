@@ -1,102 +1,163 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CarSelectionManager : MonoBehaviour
+public class CarSelectionManager : MonoBehaviour, IDataPersistence
 {
-
-    public List<GameObject> carPrefabs;
+    public List<GameObject> allCarPrefabs; // Remember to add all unlockable prefabs to this
+    private List<GameObject> unlockedCarPrefabs; // The only ones the player has
     public TMPro.TextMeshProUGUI carInfoText;
-    private int currentCarIndex = 0; 
+    private int currentCarIndex = 0;
     private Vector3 carDisplayPosition = new Vector3(0f, 0.5f, 0f);
     public GameObject uiCanvas;
 
+    private GameData gameData;
+
     void Start()
     {
-        foreach (GameObject carPrefab in carPrefabs)
+        Debug.Log("CarSelectionManager Start");
+        unlockedCarPrefabs = new List<GameObject>();
+        SetupCars();
+
+        if (DataPersistentManager.instance != null)
+        {
+            DataPersistentManager.instance.LoadGame();
+        }
+        else
+        {
+            Debug.LogError("DataPersistentManager not found");
+        }
+    }
+
+    public void LoadData(GameData data)
+    {
+        Debug.Log($"CarSelectionManager LoadData: {data.DebugString()}");
+        this.gameData = data;
+        UpdateUnlockedCars();
+        DisplayCurrentCar();
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        // For the interface, doesn't need anything here
+    }
+
+    private void UpdateUnlockedCars()
+    {
+        if (gameData == null)
+        {
+            Debug.LogError("GameData is null in UpdateUnlockedCars");
+            return;
+        }
+
+        unlockedCarPrefabs.Clear();
+        foreach (GameObject carPrefab in allCarPrefabs)
+        {
+            if (gameData.IsCarUnlocked(carPrefab.name))
+            {
+                unlockedCarPrefabs.Add(carPrefab);
+            }
+        }
+        Debug.Log($"Updated unlocked cars: {unlockedCarPrefabs.Count}. Names: {string.Join(", ", unlockedCarPrefabs.Select(c => c.name))}");
+    }
+
+    private void SetupCars()
+    {
+        foreach (GameObject carPrefab in allCarPrefabs)
         {
             carPrefab.transform.position = new Vector3(-1000, 0, 0);
             Rigidbody carRigidbody = carPrefab.GetComponent<Rigidbody>();
-            carRigidbody.isKinematic = true; // Disable physics so the car does not fall through the screen
+            if (carRigidbody != null)
+            {
+                carRigidbody.isKinematic = true;
+            }
         }
-        //For the first car
-        carPrefabs[0].transform.position = carDisplayPosition;
-        CarController carInfo = carPrefabs[currentCarIndex].GetComponent<CarController>();
-        carInfoText.text = "Top Speed: " + carInfo.TopSpeed + "\n" +
-                    "Grip: " + carInfo.TireRadius + "\n" +
-                   "Handling: " + System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2);
-        StartCoroutine(RotateCarPrefab(carPrefabs[0]));
     }
 
-    // Update is called once per frame
-    void Update()
+    private void DisplayCurrentCar()
     {
-        
+        foreach (GameObject car in allCarPrefabs)
+        {
+            car.transform.position = new Vector3(-1000, 0, 0);
+        }
+
+        if (unlockedCarPrefabs.Count > 0)
+        {
+            GameObject currentCar = unlockedCarPrefabs[currentCarIndex];
+            currentCar.transform.position = carDisplayPosition;
+            currentCar.transform.rotation = Quaternion.identity;
+            CarController carInfo = currentCar.GetComponent<CarController>();
+            UpdateCarInfoText(carInfo);
+            StopAllCoroutines();
+            StartCoroutine(RotateCarPrefab(currentCar));
+        }
+        else
+        {
+            carInfoText.text = "No cars unlocked!";
+            //Debug.LogWarning("No cars are unlocked. Check if GameData is loaded correctly and car names match.");
+        }
     }
+
+    private void UpdateCarInfoText(CarController carInfo)
+    {
+        if (carInfo != null)
+        {
+            carInfoText.text = "Top Speed: " + carInfo.TopSpeed + "\n" +
+                               "Grip: " + carInfo.TireRadius + "\n" +
+                               "Handling: " + System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2);
+        }
+        else
+        {
+            carInfoText.text = "Car info not available";
+            //Debug.LogWarning("CarController component not found on the current car prefab.");
+        }
+    }
+
     public void CycleCarPrefabs(bool isNextCar)
     {
-        // Stop the current coroutine, this stops the cars from spinning faster when it is selected repeatedly
+        if (unlockedCarPrefabs.Count == 0) return;
+
         StopAllCoroutines();
 
-        carPrefabs[currentCarIndex].transform.rotation = Quaternion.identity;
-        carPrefabs[currentCarIndex].transform.position = new Vector3(-1000, 0, 0);
+        currentCarIndex = isNextCar ?
+            (currentCarIndex + 1) % unlockedCarPrefabs.Count :
+            (currentCarIndex - 1 + unlockedCarPrefabs.Count) % unlockedCarPrefabs.Count;
 
-        currentCarIndex = isNextCar ? (currentCarIndex + 1) % carPrefabs.Count : (currentCarIndex - 1 + carPrefabs.Count) % carPrefabs.Count;
-
-        carPrefabs[currentCarIndex].transform.position = carDisplayPosition;
-        CarController carInfo = carPrefabs[currentCarIndex].GetComponent<CarController>();
-        carInfoText.text = "Top Speed: " + carInfo.TopSpeed + "\n" +
-                    "Grip: " + carInfo.TireRadius + "\n" +
-                   "Handling: " + System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2);
-
-        // Spin!
-        StartCoroutine(RotateCarPrefab(carPrefabs[currentCarIndex]));
+        DisplayCurrentCar();
     }
-
 
     private IEnumerator RotateCarPrefab(GameObject carPrefab)
     {
-        float rotationSpeed = 150f;
-        float elapsedTime = 0f;
-
+        float rotationSpeed = 30f; // Reduced rotation speed
         while (true)
         {
-            if (Vector3.Distance(carPrefab.transform.position, carDisplayPosition) < 0.1f)
-            {
-                elapsedTime += Time.deltaTime;
-                float rotationAmount = rotationSpeed * Time.deltaTime;
-                carPrefab.transform.Rotate(Vector3.up, rotationAmount);
-
-                if (elapsedTime >= 4f)
-                {
-                    elapsedTime = 0f;
-                }
-            }
-            else
-            {
-                elapsedTime = 0f;
-            }
-
+            carPrefab.transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime);
             yield return null;
         }
     }
+
     public void SelectCurrentCar()
     {
-        GameObject selectedCarPrefab = carPrefabs[currentCarIndex];
- 
-            
+        if (unlockedCarPrefabs.Count == 0) return;
+
+        GameObject selectedCarPrefab = unlockedCarPrefabs[currentCarIndex];
         Rigidbody carRigidbody = selectedCarPrefab.GetComponent<Rigidbody>();
-        carRigidbody.isKinematic = false;
+        if (carRigidbody != null)
+        {
+            carRigidbody.isKinematic = false;
+        }
 
         uiCanvas.gameObject.SetActive(false);
         PlayerPrefs.SetString("SelectedCarPrefab", selectedCarPrefab.name);
         StartCoroutine(WaitForCarToFallOutOfScreen(selectedCarPrefab));
     }
+
     private IEnumerator WaitForCarToFallOutOfScreen(GameObject carPrefab)
     {
         Quaternion originalRotation = carPrefab.transform.rotation;
-        float fallThreshold = -10f; 
+        float fallThreshold = -10f;
 
         while (carPrefab.transform.position.y > fallThreshold)
         {
