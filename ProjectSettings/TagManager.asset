@@ -6,6 +6,7 @@ TagManager:
   tags:
   - AiWaypoint
   - StartTarget
+  - Car
   layers:
   - Default
   - TransparentFX
