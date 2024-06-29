@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-
 public class Collectible : MonoBehaviour, IDataPersistence
 {
     private static int coinsCollectedThisSession = 0;
@@ -9,26 +8,26 @@ public class Collectible : MonoBehaviour, IDataPersistence
     private static float lastCollectionTime = -1f;
     [SerializeField] private float spinSpeed = 180f;
     private Renderer collectibleRenderer;
-
     private void Start()
     {
         InitializeRenderer();
     }
-
     private void Update()
     {
         transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime);
     }
-
     private void OnTriggerEnter(Collider other)
     {
-        CarController carController = other.GetComponentInParent<CarController>();
-        if (carController != null && !isCollected && Time.time - lastCollectionTime > cooldownTime)
+        PlayerDriver playerDriver = other.GetComponentInParent<PlayerDriver>();
+        if (playerDriver != null && !isCollected && Time.time - lastCollectionTime > cooldownTime)
         {
-            CollectCoin(carController);
+            CarController carController = playerDriver.GetComponent<CarController>();
+            if (carController != null)
+            {
+                CollectCoin(carController);
+            }
         }
     }
-
     private void CollectCoin(CarController carController)
     {
         coinsCollectedThisSession++;
@@ -37,7 +36,6 @@ public class Collectible : MonoBehaviour, IDataPersistence
         lastCollectionTime = Time.time;
         StartCoroutine(DeactivateAfterDelay());
     }
-
     private IEnumerator DeactivateAfterDelay()
     {
         if (collectibleRenderer != null)
@@ -52,8 +50,6 @@ public class Collectible : MonoBehaviour, IDataPersistence
         yield return new WaitForSeconds(0.1f);
         gameObject.SetActive(false);
     }
-
-
     private void InitializeRenderer()
     {
         collectibleRenderer = GetComponent<Renderer>();
@@ -62,7 +58,6 @@ public class Collectible : MonoBehaviour, IDataPersistence
             collectibleRenderer = GetComponentInChildren<Renderer>();
             if (collectibleRenderer == null)
             {
-                Debug.LogWarning($"Collectible {gameObject.name}: No Renderer component found on this GameObject or its children");
                 return;
             }
         }
@@ -72,11 +67,10 @@ public class Collectible : MonoBehaviour, IDataPersistence
         // Reset coins collected this session when loading
         coinsCollectedThisSession = 0;
     }
-
     public void SaveData(ref GameData data)
     {
         data.Money += coinsCollectedThisSession;
         Debug.Log($"Saving collected coins: {coinsCollectedThisSession}. New total money: {data.Money}");
-        coinsCollectedThisSession = 0; 
+        coinsCollectedThisSession = 0;
     }
 }
