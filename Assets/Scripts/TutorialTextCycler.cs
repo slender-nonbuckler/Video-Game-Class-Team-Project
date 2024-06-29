@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class TutorialTextCycler : MonoBehaviour
 {
     public TextMeshProUGUI tutorialText;
-    public float delay = 3f; 
+    public float delay = 4.5f; 
 
     public Button upButton; 
     public Button downButton;
@@ -20,7 +20,8 @@ public class TutorialTextCycler : MonoBehaviour
         "Welcome to the tutorial",
         "In this game, you'll be racing to the finish line",
         "Against a set of other drivers!",
-        "As you race, you'll earn points that you can use to unlock new cars",
+        "You'll achieve this by progressing through the set checkpoints throughout the course",
+        "As you race, you'll earn points  based on your standing that you can use to unlock new cars",
         "Let's learn how to drive your car first",
         "To move forward, press W",
         "To turn left, hold down W and press A",

@@ -6559,7 +6559,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tutorialText: {fileID: 522717411}
-  delay: 3
+  delay: 4.5
   upButton: {fileID: 1216664210}
   downButton: {fileID: 2062927549}
   leftButton: {fileID: 257903630}
