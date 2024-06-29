@@ -47,7 +47,7 @@ public class TutorialTextCycler : MonoBehaviour
 
     void Start()
     {
-        //finishTutorial.gameObject.SetActive(false);
+        finishTutorial.gameObject.SetActive(false);
         StartCoroutine(CycleTutorialTextOnce());
 
     }
