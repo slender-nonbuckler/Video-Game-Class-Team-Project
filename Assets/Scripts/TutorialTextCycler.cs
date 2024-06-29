@@ -6,7 +6,7 @@ using TMPro;
 public class TutorialTextCycler : MonoBehaviour
 {
     public TextMeshProUGUI tutorialText;
-    public float delay = 4f; 
+    public float delay = 3f; 
 
     public Button upButton; 
     public Button downButton;
@@ -15,7 +15,10 @@ public class TutorialTextCycler : MonoBehaviour
 
     private string[] tutorialLines = {
         "Welcome to the tutorial",
-        "Let's learn how to drive your car",
+        "In this game, you'll be racing to the finish line",
+        "Against a set of other drivers!",
+        "As you race, you'll earn points that you can use to unlock new cars",
+        "Let's learn how to drive your car first",
         "To move forward, press W",
         "To turn left, hold down W and press A",
         "To turn right, hold down W and press D",
