@@ -12,6 +12,7 @@ public class PowerupManager : MonoBehaviour
     {
         public string name;
         public float duration = 5f;
+        public System.Func<CarController, bool> isAvailable;
         public System.Action<CarController> applyEffect;
         public System.Action<CarController> removeEffect;
     }
@@ -37,6 +38,7 @@ public class PowerupManager : MonoBehaviour
         }
     }
 
+    // This is where you can define more powerups
     private void InitializePowerups()
     {
         // Speed Boost
@@ -94,15 +96,27 @@ public class PowerupManager : MonoBehaviour
         {
             name = "Car Switch",
             duration = 10f,
+            isAvailable = (car) => car.gameObject.CompareTag("Player"),  //AI cars shouldn't get a car switch (for now)
             applyEffect = (car) =>
             {
                 StartCoroutine(SwitchCarCoroutine(car));
             },
             removeEffect = (car) =>
             {
-                
+
             }
         });
+    }
+
+    public PowerupInfo GetRandomPowerup(CarController car)
+    {
+        List<PowerupInfo> availableForCar = availablePowerups.Where(p => p.isAvailable == null || p.isAvailable(car)).ToList();
+        if (availableForCar.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availableForCar.Count);
+            return availableForCar[randomIndex];
+        }
+        return null;
     }
     private IEnumerator SwitchCarCoroutine(CarController currentCar)
     {
