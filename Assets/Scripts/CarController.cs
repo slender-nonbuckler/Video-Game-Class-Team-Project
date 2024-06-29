@@ -46,7 +46,14 @@ public class CarController : MonoBehaviour
 
 
     //Getters for car selection information display
-    public float TopSpeed => topSpeed;
+    public float TopSpeed
+    {
+        get
+        {
+            Debug.Log($"Getting TopSpeed: {topSpeed}");
+            return topSpeed;
+        }
+    }
     public float MaxSteeringAngle => maxSteeringAngle;
     public float TireRadius => tireRadius;
     public float TireMass => tireMass;
@@ -57,6 +64,7 @@ public class CarController : MonoBehaviour
 
     void Start()
     {
+        Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
         SyncTireComponentSettings();
 
         if (centerOfMass != null)
@@ -130,8 +138,10 @@ public class CarController : MonoBehaviour
 
     private void SyncTireComponentSettings()
     {
+        Debug.Log($"SyncTireComponentSettings - Current topSpeed: {topSpeed}");
         foreach (TireComponent tireComponent in tireComponents)
         {
+            Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
             tireComponent.torqueCurve = torqueCurve;
@@ -171,5 +181,66 @@ public class CarController : MonoBehaviour
         Vector3 direction = Vector3.up;
         Vector3 torque = direction * airSteeringStrength * inputs.x;
         carRigidbody.AddTorque(torque, ForceMode.Acceleration);
+    }
+
+
+
+
+
+    //Helper methods for powerups
+
+    private float originalTopSpeed;
+    private List<PowerupManager.PowerupInfo> activePowerups = new List<PowerupManager.PowerupInfo>();
+
+    public void AddActivePowerup(PowerupManager.PowerupInfo powerup)
+    {
+        activePowerups.Add(powerup);
+        StartCoroutine(RemovePowerupAfterDuration(powerup));
+    }
+
+    private IEnumerator RemovePowerupAfterDuration(PowerupManager.PowerupInfo powerup)
+    {
+        yield return new WaitForSeconds(powerup.duration);
+        if (powerup.removeEffect != null)
+        {
+            powerup.removeEffect(this);
+            Debug.Log($"Removed powerup: {powerup.name}");
+        }
+        activePowerups.Remove(powerup);
+    }
+    public void SetTemporaryTopSpeed(float newTopSpeed)
+    {
+        Debug.Log($"Setting temporary top speed: {newTopSpeed}");
+        originalTopSpeed = topSpeed;
+        topSpeed = newTopSpeed;
+        UpdateTireComponentSpeeds(newTopSpeed);
+    }
+
+    public void ResetTopSpeed()
+    {
+        Debug.Log($"Resetting top speed to: {originalTopSpeed}");
+        topSpeed = originalTopSpeed;
+        UpdateTireComponentSpeeds(originalTopSpeed);
+    }
+
+    private void UpdateTireComponentSpeeds(float speed)
+    {
+        Debug.Log($"Updating tire component speeds to: {speed}");
+        foreach (TireComponent tireComponent in tireComponents)
+        {
+            tireComponent.maxSpeed = speed;
+            Debug.Log($"Tire component speed set to: {tireComponent.maxSpeed}");
+        }
+    }
+    public void ResetAllPowerups()
+    {
+        foreach (var powerup in activePowerups)
+        {
+            if (powerup.removeEffect != null)
+            {
+                powerup.removeEffect(this);
+            }
+        }
+        activePowerups.Clear();
     }
 }
