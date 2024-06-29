@@ -1,34 +1,45 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class AiDriver : MonoBehaviour {
+    public enum Difficulty {
+        Pushover,
+        Easy,
+        Medium,
+        Hard,
+        Expert
+    }
+    
+    Vector2 INVALID_VECTOR2 = Vector2.positiveInfinity;
+    
     [Header("References")] [SerializeField]
     private CarController carController;
 
     [SerializeField] private List<Transform> waypoints;
     [SerializeField] private Transform target;
 
-    [Header("Parameters")] [SerializeField] [Range(0f, 1f)]
-    private float difficulty = 0f;
+    [Header("Parameters")] 
+    [SerializeField]
+    private Difficulty difficulty = Difficulty.Medium;
+    private Difficulty prevDifficulty = Difficulty.Pushover;
+    
 
     [Range(0f, 1f)]
     [SerializeField] private float noiseLerpFactor = 0f;
     [SerializeField] private float timeBetweenNoiseChanges = 0.3f;
+    [SerializeField] [Range(0f, 1f)] private float noiseWeight = 0f;
+    
     private float timeTillNextNoiseChange = 0f;
-
-    Vector2 INVALID_VECTOR2 = Vector2.positiveInfinity;
     private Vector2 currNoise = Vector2.zero;
     private Vector2 targetNoise = Vector2.zero;
     
-    
     private Vector2 input;
+    
     void Start() {
         FindWaypoints();
         FindStartTarget();
+        SyncDifficultySettings();
     }
 
     void Update() {
@@ -41,9 +52,13 @@ public class AiDriver : MonoBehaviour {
             GetInputToNextTarget()
         };
         
-        Vector2 carInput = GetWeightedInput(desiredInputs) + (GetInputNoise() * Mathf.Abs(1 - difficulty));
-        input = carInput.normalized;
+        Vector2 carInput = GetWeightedInput(desiredInputs) + GetDifficultyInputNoise();
+        input = carInput;
         carController.SetInputs(carInput);
+    }
+
+    public void SetDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
     }
 
     private void OnDrawGizmos() {
@@ -51,12 +66,50 @@ public class AiDriver : MonoBehaviour {
         Debug.DrawLine(transform.position, transform.position + relativeInput * 10, Color.red);
     }
 
-    private Vector2 GetInputNoise() {
+    private Vector2 GetDifficultyInputNoise() {
+        if (difficulty != prevDifficulty) {
+            SyncDifficultySettings();
+        }
         UpdateInputNoise();
         currNoise = Vector2.Lerp(currNoise, targetNoise, noiseLerpFactor);
         Vector3 relativeNoise = transform.forward * currNoise.y + transform.right * currNoise.x;
         Debug.DrawLine(transform.position, transform.position + relativeNoise * 10);
-        return currNoise;
+        return currNoise * noiseWeight;
+    }
+
+    private void SyncDifficultySettings() {
+        Debug.Log("Syncing difficulty: " + difficulty);
+        switch (difficulty) {
+            case Difficulty.Pushover:
+                noiseWeight = 1f;
+                timeBetweenNoiseChanges = 1f;
+                noiseLerpFactor = 0.05f;
+                break;
+            
+            case Difficulty.Easy:
+                noiseWeight = 0.5f;
+                timeBetweenNoiseChanges = 0.75f;
+                noiseLerpFactor = 0.1f;
+                break;
+            
+            case Difficulty.Medium:
+                noiseWeight = 0.25f;
+                timeBetweenNoiseChanges = 0.5f;
+                noiseLerpFactor = 0.2f;
+                break;
+            
+            case Difficulty.Hard:
+                noiseWeight = 0.125f;
+                timeBetweenNoiseChanges = 0.25f;
+                noiseLerpFactor = 0.4f;
+                break;
+            
+            case Difficulty.Expert:
+                noiseWeight = 0f;
+                break;
+        }
+
+        prevDifficulty = difficulty;
     }
 
     private void UpdateInputNoise() {
