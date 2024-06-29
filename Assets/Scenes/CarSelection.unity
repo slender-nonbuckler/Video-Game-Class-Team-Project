@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 056690aefbf41cd449ebd5803dad08c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carPrefabs:
+  allCarPrefabs:
   - {fileID: 1970515139}
   - {fileID: 637898123}
   - {fileID: 1731857955}

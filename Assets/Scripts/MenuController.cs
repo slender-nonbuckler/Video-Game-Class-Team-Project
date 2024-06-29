@@ -1,51 +1,59 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour
 {
     private DataPersistentManager dataPersistenceManager;
-    private GameData gameData;
-   
-   void Start()
-    {   
-        
-        dataPersistenceManager = FindObjectOfType<DataPersistentManager>();
+
+    void Start()
+    {
+        Debug.Log("MenuController Start");
+        dataPersistenceManager = DataPersistentManager.instance;
         if (dataPersistenceManager == null)
         {
-            Debug.LogError("DataPersistenceManager not found in the scene.");
+           // Debug.LogError("DataPersistenceManager not found. Initialize it");
         }
     }
-    public void StartButton()
-    {   
-        PlayerPrefs.SetInt("NewGame", 1);
-        //DataPersistentManager.instance.SetShouldntLoadGame();
-        DataPersistentManager.instance.NewGame();
-        SceneManager.LoadScene(1);
-       
+
+    public void StartNewGame()
+    {
+        Debug.Log("Starting New Game");
+        if (dataPersistenceManager != null)
+        {
+            dataPersistenceManager.NewGame();
+            //Debug.Log("New game created. Loading CarSelection scene.");
+            SceneManager.LoadScene("CarSelection");
+        }
+        else
+        {
+            //Debug.LogError("DataPersistenceManager is null.");
+        }
     }
 
-    public void QuitButton()
+    public void ContinueGame()
+    {
+        Debug.Log("Continuing Game");
+        if (dataPersistenceManager != null)
+        {
+            if (dataPersistenceManager.HasGameData())
+            {
+                dataPersistenceManager.LoadGame();
+                SceneManager.LoadScene("CarSelection");
+            }
+            else
+            {
+               // Debug.LogWarning("No saved game found. Starting a new game instead.");
+                StartNewGame();
+            }
+        }
+        else
+        {
+            //Debug.LogError("DataPersistenceManager is null.");
+        }
+    }
+
+    public void QuitGame()
     {
         Application.Quit();
     }
-   
-
-    public void ContinueButton()
-    {
-        if (dataPersistenceManager != null)
-        {   
-            
-            DataPersistentManager.instance.LoadGame();
-            Debug.LogError(dataPersistenceManager.shouldLoadGame);
-        }
-        SceneManager.LoadScene(1);
-    }
-     public void DeactivateMenu() 
-    {
-        this.gameObject.SetActive(false);
-    }
-    
-
 }

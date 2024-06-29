@@ -15,7 +15,6 @@ public class Powerup : MonoBehaviour
 
     private void Start()
     {
-        AssignRandomPowerup();
         InitializeRenderer();
     }
 
@@ -43,91 +42,98 @@ public class Powerup : MonoBehaviour
             powerupRenderer = GetComponentInChildren<Renderer>();
             if (powerupRenderer == null)
             {
-                Debug.LogError($"Powerup {gameObject.name}: No Renderer component found on this GameObject or its children");
+              //  Debug.LogError($"Powerup {gameObject.name}: No Renderer component found on this GameObject or its children");
                 return;
             }
             else
             {
-                Debug.Log($"Powerup {gameObject.name}: Renderer found on child object: {powerupRenderer.gameObject.name}");
+               // Debug.Log($"Powerup {gameObject.name}: Renderer found on child object: {powerupRenderer.gameObject.name}");
             }
         }
 
         if (powerupRenderer.sharedMaterial == null)
         {
-            Debug.LogError($"Powerup {gameObject.name}: Renderer has no material assigned");
+           // Debug.LogError($"Powerup {gameObject.name}: Renderer has no material assigned");
             return;
         }
 
         // Create a material instance to avoid changing shared materials
         powerupMaterial = new Material(powerupRenderer.sharedMaterial);
         powerupRenderer.material = powerupMaterial;
-        Debug.Log($"Powerup {gameObject.name}: Renderer and material initialized successfully");
+       // Debug.Log($"Powerup {gameObject.name}: Renderer and material initialized successfully");
     }
-    private void AssignRandomPowerup()
-    {
-        if (PowerupManager.Instance == null)
-        {
-            Debug.LogError("PowerupManager.Instance is null!");
-            return;
-        }
-        powerupInfo = PowerupManager.Instance.GetRandomPowerup();
-        if (powerupInfo == null)
-        {
-            Debug.LogError("Failed to get a random powerup from PowerupManager!");
-            return;
-        }
-        Debug.Log($"Powerup {gameObject.name} assigned powerup: {powerupInfo.name}");
-    }
+
 
     private void OnTriggerEnter(Collider other)
     {
         CarController carController = other.GetComponentInParent<CarController>();
         if (carController != null && !isCollected && Time.time - lastCollectionTime > cooldownTime)
         {
-            Debug.Log($"Powerup {gameObject.name} triggered. Applying powerup: {powerupInfo.name}");
-            ApplyPowerup(carController);
-            isCollected = true;
-            lastCollectionTime = Time.time;
-            StartCoroutine(DeactivateAfterDelay());
+            PowerupManager.PowerupInfo powerupInfo = AssignRandomPowerup(carController);
+            if (powerupInfo != null)
+            {
+               // Debug.Log($"Powerup {gameObject.name} triggered. Applying powerup: {powerupInfo.name}");
+                ApplyPowerup(carController, powerupInfo);
+                isCollected = true;
+                lastCollectionTime = Time.time;
+                StartCoroutine(DeactivateAfterDelay());
+            }
         }
     }
 
-    private void ApplyPowerup(CarController carController)
+    private PowerupManager.PowerupInfo AssignRandomPowerup(CarController carController)
+    {
+        if (PowerupManager.Instance == null)
+        {
+          //  Debug.LogError("PowerupManager.Instance is null!");
+            return null;
+        }
+        PowerupManager.PowerupInfo powerupInfo = PowerupManager.Instance.GetRandomPowerup(carController);
+        if (powerupInfo == null)
+        {
+           // Debug.LogError("Failed to get a random powerup from PowerupManager!");
+            return null;
+        }
+       // Debug.Log($"Powerup {gameObject.name} assigned powerup: {powerupInfo.name}");
+        return powerupInfo;
+    }
+
+    private void ApplyPowerup(CarController carController, PowerupManager.PowerupInfo powerupInfo)
     {
         if (powerupInfo == null || powerupInfo.applyEffect == null)
         {
-            Debug.LogError($"Powerup {gameObject.name}: PowerupInfo or applyEffect is null!");
+            //Debug.LogError($"Powerup {gameObject.name}: PowerupInfo or applyEffect is null!");
             return;
         }
         carController.AddActivePowerup(powerupInfo);
         powerupInfo.applyEffect(carController);
-        Debug.Log($"Powerup {gameObject.name}: Applied effect. Duration: {powerupInfo.duration}");
+        //Debug.Log($"Powerup {gameObject.name}: Applied effect. Duration: {powerupInfo.duration}");
     }
 
     private IEnumerator DeactivateAfterDelay()
     {
-        Debug.Log($"Powerup {gameObject.name}: Starting DeactivateAfterDelay coroutine");
+       // Debug.Log($"Powerup {gameObject.name}: Starting DeactivateAfterDelay coroutine");
         if (powerupRenderer != null)
         {
             powerupRenderer.enabled = false;
-            Debug.Log($"Powerup {gameObject.name}: Disabled Renderer");
+           // Debug.Log($"Powerup {gameObject.name}: Disabled Renderer");
         }
         else
         {
-            Debug.LogWarning($"Powerup {gameObject.name}: No Renderer component found");
+            //Debug.LogWarning($"Powerup {gameObject.name}: No Renderer component found");
         }
         Collider collider = GetComponent<Collider>();
         if (collider != null)
         {
             collider.enabled = false;
-            Debug.Log($"Powerup {gameObject.name}: Disabled Collider");
+           // Debug.Log($"Powerup {gameObject.name}: Disabled Collider");
         }
         else
         {
-            Debug.LogWarning($"Powerup {gameObject.name}: No Collider component found");
+         //   Debug.LogWarning($"Powerup {gameObject.name}: No Collider component found");
         }
         yield return new WaitForSeconds(0.1f); // Short delay before deactivating
-        Debug.Log($"Powerup {gameObject.name}: Deactivating gameObject");
+        //Debug.Log($"Powerup {gameObject.name}: Deactivating gameObject");
         gameObject.SetActive(false);
     }
 }
