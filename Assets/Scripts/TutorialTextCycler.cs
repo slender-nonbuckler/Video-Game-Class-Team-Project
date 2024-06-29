@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class TutorialTextCycler : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class TutorialTextCycler : MonoBehaviour
     public Button downButton;
     public Button leftButton; 
     public Button rightButton;
+
+    public Button finishTutorial;
 
     private string[] tutorialLines = {
         "Welcome to the tutorial",
@@ -32,18 +35,21 @@ public class TutorialTextCycler : MonoBehaviour
         "Sometimes, the car may get stuck",
         "When this happens, press on the Spacebar to reset your car",
         "In the game, there are power ups and power downs",
-        "When you see a spinning coin, you can try your luck!",
-        "Drive into the coins on the road and see what happens",
+        "When you see a spinning tire, you can try your luck!",
+        "Drive into the tire on the road and see what happens",
         "Look around for a ramp!",
         "Try driving on it and see how the car handles in the air",
-        ""
+        "You've reached the end of the tutorial",
+        "Click Continue Tutorial to jump into racing"
     };
 
     private int currentLineIndex = 0;
 
     void Start()
     {
+        finishTutorial.gameObject.SetActive(false);
         StartCoroutine(CycleTutorialTextOnce());
+
     }
 
     private IEnumerator CycleTutorialTextOnce()
@@ -56,6 +62,7 @@ public class TutorialTextCycler : MonoBehaviour
 
             currentLineIndex++; 
         }
+        finishTutorial.gameObject.SetActive(true);
     }
 
     void Update()
