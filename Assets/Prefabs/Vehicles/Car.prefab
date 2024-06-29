@@ -352,6 +352,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a760ea53a0e7b5fe978618a8c02a296, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drivableLayers:
+    serializedVersion: 2
+    m_Bits: 51
   carRigidbody: {fileID: 1523214592596717210}
   tireComponents:
   - {fileID: 1523214592638679495}
@@ -469,6 +472,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 1523214592596717213}
+  waypoints: []
+  target: {fileID: 0}
 --- !u!1 &1523214592638679489
 GameObject:
   m_ObjectHideFlags: 0
