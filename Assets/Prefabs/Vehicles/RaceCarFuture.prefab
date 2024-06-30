@@ -964,6 +964,7 @@ GameObject:
   - component: {fileID: 7121392570897361860}
   - component: {fileID: 2343611650181911814}
   - component: {fileID: 7179106619109275393}
+  - component: {fileID: 5418960498197508451}
   m_Layer: 0
   m_Name: RaceCarFuture
   m_TagString: Car
@@ -1141,6 +1142,10 @@ MonoBehaviour:
   carController: {fileID: 7121392570897361860}
   waypoints: []
   target: {fileID: 0}
+  difficulty: 2
+  noiseLerpFactor: 0
+  timeBetweenNoiseChanges: 0.3
+  noiseWeight: 0
 --- !u!82 &7179106619109275393
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1237,6 +1242,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &5418960498197508451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7121392570897361868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b68f379f85cf201419186f031e85d2f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cost: 1
 --- !u!1 &7755089850085103452
 GameObject:
   m_ObjectHideFlags: 0

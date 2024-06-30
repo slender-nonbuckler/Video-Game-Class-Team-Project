@@ -11,6 +11,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
     private List<GameObject> unlockedCarPrefabs;
     private List<GameObject> lockedCarPrefabs;
     public TMPro.TextMeshProUGUI carInfoText;
+    public TMPro.TextMeshProUGUI playerMoneyText;
     private int currentCarIndex = 0;
     private Vector3 carDisplayPosition = new Vector3(0f, 0.5f, 0f);
     public GameObject uiCanvas;
@@ -43,6 +44,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         this.gameData = data;
         UpdateCarLists();
         DisplayCurrentCar();
+        UpdatePlayerMoneyDisplay(); 
     }
 
     public void SaveData(ref GameData data)
@@ -54,7 +56,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
     {
         if (gameData == null)
         {
-            Debug.LogError("GameData is null in UpdateCarLists");
+            //Debug.LogError("GameData is null in UpdateCarLists");
             return;
         }
 
@@ -111,6 +113,8 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         }
         else
         {
+
+            // Only in the worst case!!!
             carInfoText.text = "No cars available!";
             ButtonSelect.gameObject.SetActive(false);
             ButtonUnlock.gameObject.SetActive(false);
@@ -122,13 +126,10 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         if (carInfo != null)
         {
             CarCost carCost = carInfo.GetComponent<CarCost>();
-            
-            // All the given cars (trucks) have their cost set to 0 so it doesn't break this, and it will not display the cost since it was FREEEEE
             int cost = carCost != null ? carCost.Cost : 0;
 
             string infoText = "";
 
-            // Display cost only if it's greater than 0 (locked car)
             if (cost > 0)
             {
                 infoText += $"Cost: ${cost}\n";
@@ -151,6 +152,23 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         bool isUnlocked = unlockedCarPrefabs.Contains(car);
         ButtonSelect.gameObject.SetActive(isUnlocked);
         ButtonUnlock.gameObject.SetActive(!isUnlocked);
+
+        if (!isUnlocked)
+        {
+            CarCost carCost = car.GetComponent<CarCost>();
+            if (carCost != null)
+            {
+                ButtonUnlock.interactable = gameData.getMoney >= carCost.Cost;
+            }
+        }
+    }
+
+    private void UpdatePlayerMoneyDisplay()
+    {
+        if (playerMoneyText != null)
+        {
+            playerMoneyText.text = $"Money: ${gameData.getMoney}";
+        }
     }
 
     public void CycleCarPrefabs(bool isNextCar)
@@ -204,6 +222,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
 
     public void UnlockCurrentCar()
     {
+
         List<GameObject> allCars = new List<GameObject>(unlockedCarPrefabs);
         allCars.AddRange(lockedCarPrefabs);
 
@@ -213,12 +232,41 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
 
         if (!unlockedCarPrefabs.Contains(selectedCarPrefab))
         {
-            // TODO: Implement purchase logic here
-            Debug.Log("Attempting to unlock car: " + selectedCarPrefab.name);
+            CarCost carCost = selectedCarPrefab.GetComponent<CarCost>();
+            if (carCost != null)
+            {
+                int cost = carCost.Cost;
+                if (gameData.getMoney >= cost)
+                {
+                    // Take money, yoink
+                    gameData.SetMoney(gameData.getMoney - cost);
 
-            gameData.UnlockCar(selectedCarPrefab.name);
-            UpdateCarLists();
-            DisplayCurrentCar();
+                    gameData.UnlockCar(selectedCarPrefab.name);
+
+                    // Save the game
+                    DataPersistentManager.instance.SaveGame();
+
+                    // Update lists and display
+                    UpdateCarLists();
+                    DisplayCurrentCar();
+                    UpdatePlayerMoneyDisplay();
+                    UpdateButtonStatus(selectedCarPrefab);
+
+                    Debug.Log($"Car unlocked: {selectedCarPrefab.name}. Remaining money: ${gameData.getMoney}");
+                }
+                else
+                {
+                    Debug.Log($"Not enough money to unlock {selectedCarPrefab.name}. Required: ${cost}, Available: ${gameData.getMoney}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"CarCost component not found on {selectedCarPrefab.name}");
+            }
+        }
+        else
+        {
+            Debug.Log($"Car {selectedCarPrefab.name} is already unlocked");
         }
     }
 
