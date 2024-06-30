@@ -106,14 +106,13 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
             currentCar.transform.position = carDisplayPosition;
             currentCar.transform.rotation = Quaternion.identity;
             CarController carInfo = currentCar.GetComponent<CarController>();
-            UpdateCarInfoText(carInfo);
+            UpdateCarInfoText(currentCar);
             UpdateButtonStatus(currentCar);
             StopAllCoroutines();
             StartCoroutine(RotateCarPrefab(currentCar));
         }
         else
         {
-
             // Only in the worst case!!!
             carInfoText.text = "No cars available!";
             ButtonSelect.gameObject.SetActive(false);
@@ -121,16 +120,18 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private void UpdateCarInfoText(CarController carInfo)
+    private void UpdateCarInfoText(GameObject car)
     {
+        CarController carInfo = car.GetComponent<CarController>();
         if (carInfo != null)
         {
-            CarCost carCost = carInfo.GetComponent<CarCost>();
+            CarCost carCost = car.GetComponent<CarCost>();
             int cost = carCost != null ? carCost.Cost : 0;
 
             string infoText = "";
 
-            if (cost > 0)
+            // Only display cost if the car is not unlocked
+            if (!unlockedCarPrefabs.Contains(car) && cost > 0)
             {
                 infoText += $"Cost: ${cost}\n";
             }
@@ -222,7 +223,6 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
 
     public void UnlockCurrentCar()
     {
-
         List<GameObject> allCars = new List<GameObject>(unlockedCarPrefabs);
         allCars.AddRange(lockedCarPrefabs);
 
@@ -246,13 +246,17 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
                     // Save the game
                     DataPersistentManager.instance.SaveGame();
 
-                    // Update lists and display
+                    // keep current car index (so it doesn't show another car after updating)
+                    int oldIndex = allCars.IndexOf(selectedCarPrefab);
                     UpdateCarLists();
+                    allCars = new List<GameObject>(unlockedCarPrefabs);
+                    allCars.AddRange(lockedCarPrefabs);
+                    currentCarIndex = allCars.IndexOf(selectedCarPrefab);
+
                     DisplayCurrentCar();
                     UpdatePlayerMoneyDisplay();
-                    UpdateButtonStatus(selectedCarPrefab);
 
-                    Debug.Log($"Car unlocked: {selectedCarPrefab.name}. Remaining money: ${gameData.getMoney}");
+                    Debug.Log($"Car unlocked: {selectedCarPrefab.name}. money: ${gameData.getMoney}");
                 }
                 else
                 {
@@ -269,7 +273,6 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
             Debug.Log($"Car {selectedCarPrefab.name} is already unlocked");
         }
     }
-
     private IEnumerator WaitForCarToFallOutOfScreen(GameObject carPrefab)
     {
         Quaternion originalRotation = carPrefab.transform.rotation;
@@ -281,6 +284,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         }
         carPrefab.transform.rotation = originalRotation;
 
+        //TODO: UPDATE THIS TO THE CORRECT PLACE DEPENDING ON WHAT SCENE PRECEDES THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         SceneManager.LoadScene("TutorialScene");
     }
 }
