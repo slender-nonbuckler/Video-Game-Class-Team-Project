@@ -13,11 +13,18 @@ public class Checkpoint : MonoBehaviour {
         private set => _id = value;
     }
 
-    public event EventHandler OnPassCheckpoint;
+    public event EventHandler<CarController> OnPassCheckpoint;
     
     private void OnTriggerEnter(Collider other) {
-        if (other.attachedRigidbody.CompareTag("Car")) {
-            OnPassCheckpoint?.Invoke(this, EventArgs.Empty);   
+        if (!other.attachedRigidbody.CompareTag("Car")) {
+             return;
         }
+
+        CarController carController = other.attachedRigidbody.GetComponent<CarController>();
+        if (!carController) {
+            return;
+        }
+        
+        OnPassCheckpoint?.Invoke(this, carController);
     }
 }

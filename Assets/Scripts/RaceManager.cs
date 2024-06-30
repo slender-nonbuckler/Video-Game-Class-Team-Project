@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 /**
  * In charge of an individual racetrack, its setup progress and completion.
@@ -13,30 +14,37 @@ using UnityEngine.Events;
  * - Providing info on race events like overtakes, or last laps.
  */
 public class RaceManager : MonoBehaviour {
-    public UnityEvent OnRaceCountdown;
-    public UnityEvent OnRaceStart;
+    public UnityEvent OnRaceCountdown; 
+    public UnityEvent OnDrivingStart;
     public UnityEvent OnRaceEnd;
 
-    [Header("References")]
-    [SerializeField] private List<Transform> startPositions;
+    [Header("References")] [SerializeField]
+    private List<Transform> startPositions;
+
     [SerializeField] private List<Checkpoint> checkpoints;
     [SerializeField] private List<CarController> racers;
     [SerializeField] private List<GameObject> testRacerGos;
 
-    [Header("Parameters")] 
-    [SerializeField] private float countdownLength = 3f;
+    [Header("Parameters")] [SerializeField]
+    private float countdownLength = 3f;
+
     [SerializeField] private int lapsNeededToFinish = 3;
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
-    
-    
-    public List<Transform> getStartPositions() {
+
+    private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
+
+    public List<Transform> GetStartPositions() {
         return startPositions;
     }
 
-    public List<CarController> getResults() {
+    public List<CarController> GetResults() {
         throw new NotImplementedException();
+    }
+
+    public RaceProgress GetRaceProgress(CarController carController) {
+        return progressByCar[carController];
     }
 
     public void PositionRacers(List<GameObject> racerGameObjects) {
@@ -51,9 +59,10 @@ public class RaceManager : MonoBehaviour {
             CarController carController = racer.GetComponent<CarController>();
             if (carController) {
                 racers.Add(carController);
+                progressByCar[carController] = new RaceProgress();
             }
         }
-        
+
         DisableDrivers();
     }
 
@@ -72,7 +81,7 @@ public class RaceManager : MonoBehaviour {
         foreach (Checkpoint checkpoint in checkpoints) {
             checkpoint.OnPassCheckpoint += HandlePassCheckpoint;
         }
-        
+
         PositionRacers(testRacerGos);
         StartRaceCountdown();
     }
@@ -91,18 +100,40 @@ public class RaceManager : MonoBehaviour {
         if (countdownTimer < 0f) {
             isCountdownFinished = true;
             EnableDrivers();
-            OnRaceStart?.Invoke();
+            OnDrivingStart?.Invoke();
         }
     }
 
-    private void HandlePassCheckpoint(object sender, EventArgs e) {
+    private void HandlePassCheckpoint(object sender, CarController carController) {
+        if (progressByCar.ContainsKey(carController) == false) {
+            Debug.Log("Non racing car passed checkpoint.");
+            return;
+        }
+
         Checkpoint checkpoint = (Checkpoint)sender;
-        Debug.Log("Passed checkpoint: " + checkpoint.id);
+        RaceProgress raceProgress = progressByCar[carController];
+
+        if (checkpoint.id != raceProgress.nextCheckpointId) {
+            Debug.Log("Checkpoint visited in wrong order");
+            return;
+        }
+
+        if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue) {
+            raceProgress.lapsCompleted++;
+        }
+        
+        if (raceProgress.lapsCompleted >= lapsNeededToFinish) {
+            Debug.Log("Race has been completed.");
+            OnRaceEnd?.Invoke();
+        }
+
+        raceProgress.previousCheckpointId = raceProgress.nextCheckpointId;
+        raceProgress.nextCheckpointId++; 
+        raceProgress.nextCheckpointId %= checkpoints.Count; 
     }
 
     private void EnableDrivers() {
         foreach (CarController racer in racers) {
-            
             PlayerDriver playerDriver = racer.GetComponent<PlayerDriver>();
             AiDriver aiDriver = racer.GetComponent<AiDriver>();
 
@@ -119,7 +150,6 @@ public class RaceManager : MonoBehaviour {
 
     private void DisableDrivers() {
         foreach (CarController racer in racers) {
-            
             PlayerDriver playerDriver = racer.GetComponent<PlayerDriver>();
             AiDriver aiDriver = racer.GetComponent<AiDriver>();
 
@@ -131,5 +161,13 @@ public class RaceManager : MonoBehaviour {
                 aiDriver.enabled = false;
             }
         }
+    }
+
+    public class RaceProgress {
+        public int nextCheckpointId = 0;
+        public int previousCheckpointId = int.MinValue;
+        public int lapsCompleted = 0;
+        public float lapProgress = 0f;
+        public int racePosition = 0;
     }
 }
