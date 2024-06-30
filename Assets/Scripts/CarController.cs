@@ -64,9 +64,6 @@ public class CarController : MonoBehaviour
     public float Strength => strength;
     public float Damping => damping;
 
-    public AudioSource carCollisionAudioSource;
-    public AudioClip[] carCollisionSounds;
-
     void Start()
     {
         Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
@@ -78,11 +75,6 @@ public class CarController : MonoBehaviour
         }
 
         startHeight = transform.position.y;
-    }
-
-    private void Awake()
-    {
-        carCollisionAudioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -252,14 +244,5 @@ public class CarController : MonoBehaviour
             }
         }
         activePowerups.Clear();
-    }
-
-    private void OnCollisionEnter(Collision otherEntity)
-    {
-        if (otherEntity.gameObject.CompareTag("Car"))
-        {
-            carCollisionAudioSource.clip = carCollisionSounds[Random.Range(0, carCollisionSounds.Length)];
-            carCollisionAudioSource.PlayOneShot(carCollisionAudioSource.clip);
-        }
     }
 }
