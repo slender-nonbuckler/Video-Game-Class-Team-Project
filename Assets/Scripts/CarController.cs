@@ -140,9 +140,9 @@ public class CarController : MonoBehaviour {
     private void SyncTireComponentSettings() {
         Debug.Log($"SyncTireComponentSettings - Current topSpeed: {topSpeed}");
         foreach (TireComponent tireComponent in tireComponents) {
-            Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
+            Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
             tireComponent.torqueCurve = torqueCurve;
             tireComponent.maxSteeringAngle = maxSteeringAngle;
 
