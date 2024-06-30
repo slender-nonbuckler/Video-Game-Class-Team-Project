@@ -27,4 +27,18 @@ public class Checkpoint : MonoBehaviour {
         
         OnPassCheckpoint?.Invoke(this, carController);
     }
+
+    private void OnDrawGizmos() {
+        Collider trigger = GetComponent<Collider>();
+        if (!trigger) {
+            return;
+        }
+
+        Bounds bounds = trigger.bounds;
+        Color triggerColor = Color.green;
+        triggerColor.a = 0.1f;
+        
+        Gizmos.color = triggerColor;
+        Gizmos.DrawCube(bounds.center, bounds.size);
+    }
 }

@@ -1129,7 +1129,7 @@ MonoBehaviour:
   OnRaceCountdown:
     m_PersistentCalls:
       m_Calls: []
-  OnRaceStart:
+  OnDrivingStart:
     m_PersistentCalls:
       m_Calls: []
   OnRaceEnd:
@@ -1152,7 +1152,7 @@ MonoBehaviour:
   - {fileID: 510781828}
   - {fileID: 1177462266}
   countdownLength: 3
-  lapsNeededToFinish: 3
+  lapsNeededToFinish: 1
 --- !u!4 &1049261130
 Transform:
   m_ObjectHideFlags: 0

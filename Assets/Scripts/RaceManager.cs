@@ -90,6 +90,17 @@ public class RaceManager : MonoBehaviour {
         UpdateCountdown();
     }
 
+    private void OnDrawGizmosSelected() {
+        Color startPositionColor = Color.green;
+        startPositionColor.a = 0.2f;
+
+        Gizmos.color = startPositionColor;
+        foreach (Transform startPosition in startPositions) {
+            Gizmos.matrix = startPosition.transform.localToWorldMatrix;
+            Gizmos.DrawCube(Vector3.one, new Vector3(3f, 0.5f, 5f));
+        }
+    }
+
     private void UpdateCountdown() {
         if (isCountdownStarted == false || isCountdownFinished) {
             return;
