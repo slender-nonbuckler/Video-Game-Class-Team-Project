@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class CarController : MonoBehaviour {
     [Header("References")] [SerializeField]
@@ -64,7 +66,11 @@ public class CarController : MonoBehaviour {
     public float Strength => strength;
     public float Damping => damping;
 
-    void Start() {
+    public AudioSource carCollisionAudioSource;
+    public AudioClip[] carCollisionSounds;
+
+    void Start()
+    {
         Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
         SyncTireComponentSettings();
 
@@ -75,8 +81,15 @@ public class CarController : MonoBehaviour {
         startHeight = transform.position.y;
     }
 
-    void Update() {
-        foreach (TireComponent tireComponent in tireComponents) {
+    private void Awake()
+    {
+        carCollisionAudioSource = GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        foreach (TireComponent tireComponent in tireComponents)
+        {
             //Debug.Log("Setting Tire Inputs: " + inputs);
             tireComponent.SetInputs(inputs);
         }
@@ -216,5 +229,14 @@ public class CarController : MonoBehaviour {
         }
 
         activePowerups.Clear();
+    }
+
+    private void OnCollisionEnter(Collision otherEntity)
+    {
+        if (otherEntity.gameObject.CompareTag("Car"))
+        {
+            carCollisionAudioSource.clip = carCollisionSounds[Random.Range(0, carCollisionSounds.Length)];
+            carCollisionAudioSource.PlayOneShot(carCollisionAudioSource.clip);
+        }
     }
 }
