@@ -151,7 +151,7 @@ public class RaceManager : MonoBehaviour {
 
             if (playerDriver) {
                 playerDriver.enabled = true;
-                return;
+                continue;
             }
 
             if (aiDriver) {
