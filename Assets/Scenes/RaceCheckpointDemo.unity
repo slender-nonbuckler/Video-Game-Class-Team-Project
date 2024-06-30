@@ -1129,6 +1129,9 @@ MonoBehaviour:
   OnRaceCountdown:
     m_PersistentCalls:
       m_Calls: []
+  OnRaceStart:
+    m_PersistentCalls:
+      m_Calls: []
   OnRaceEnd:
     m_PersistentCalls:
       m_Calls: []
@@ -1148,6 +1151,8 @@ MonoBehaviour:
   - {fileID: 1578203836}
   - {fileID: 510781828}
   - {fileID: 1177462266}
+  countdownLength: 3
+  lapsNeededToFinish: 3
 --- !u!4 &1049261130
 Transform:
   m_ObjectHideFlags: 0
@@ -1705,9 +1710,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 127359808026759642, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
+      propertyPath: strength
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 127359808026759642, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
+      propertyPath: selfRightingStrength
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 127359808026759645, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
       propertyPath: m_Mass
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 127359808032761411, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.88
       objectReference: {fileID: 0}
     - target: {fileID: 4870101749901750040, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
       propertyPath: m_Enabled
