@@ -10,7 +10,7 @@ public class Checkpoint : MonoBehaviour {
     [SerializeField] private int _id;
     public int id {
         get => _id;
-        private set => _id = value;
+        set => _id = value;
     }
 
     public event EventHandler<CarController> OnPassCheckpoint;

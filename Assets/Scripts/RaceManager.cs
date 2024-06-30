@@ -78,8 +78,9 @@ public class RaceManager : MonoBehaviour {
 
 
     private void Start() {
-        foreach (Checkpoint checkpoint in checkpoints) {
-            checkpoint.OnPassCheckpoint += HandlePassCheckpoint;
+        for (int i = 0; i < checkpoints.Count; i++) {
+            checkpoints[i].id = i;
+            checkpoints[i].OnPassCheckpoint += HandlePassCheckpoint;
         }
 
         PositionRacers(testRacerGos);
