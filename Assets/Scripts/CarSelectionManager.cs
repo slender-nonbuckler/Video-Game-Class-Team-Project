@@ -284,7 +284,15 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         }
         carPrefab.transform.rotation = originalRotation;
 
-        //TODO: UPDATE THIS TO THE CORRECT PLACE DEPENDING ON WHAT SCENE PRECEDES THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        SceneManager.LoadScene("TutorialScene");
+        if (PlayerPrefs.GetInt("TutorialCompleted", 0) == 0)
+        {
+            // Tutorial hasn't been completed, route to TutorialScene
+            SceneManager.LoadScene("TutorialScene");
+        }
+        else
+        {
+            // Tutorial has been completed, route to Track1v2 scene
+            SceneManager.LoadScene("Track1v2");
+        }
     }
 }
