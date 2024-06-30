@@ -340,8 +340,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 769bf75dc32f70f4493d59b1ea97d923, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  car: {fileID: 127359808026759645}
   carPitch: 1
-  engineAudioSource: {fileID: 0}
+  carCollisionPitchMin: 1
+  carCollisionPitchMax: 1
+  carSpeed: 0
+  engineAudioSource: {fileID: 3430411803426239388}
   collisionAudioSource: {fileID: 803136681305717885}
   carCollisionSounds:
   - {fileID: 8300000, guid: 47536f53edca86549b12b72afcbc73f7, type: 3}
@@ -1034,7 +1038,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1089228741969799235}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 9db384b916415844c84fa0d164f353f0, type: 3}
