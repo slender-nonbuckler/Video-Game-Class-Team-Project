@@ -14,7 +14,7 @@ using UnityEngine.Serialization;
  * - Providing info on race events like overtakes, or last laps.
  */
 public class RaceManager : MonoBehaviour {
-    public UnityEvent OnRaceCountdown; 
+    public UnityEvent OnRaceCountdown;
     public UnityEvent OnDrivingStart;
     public UnityEvent OnRaceEnd;
 
@@ -59,7 +59,7 @@ public class RaceManager : MonoBehaviour {
             CarController carController = racer.GetComponent<CarController>();
             if (carController) {
                 racers.Add(carController);
-                progressByCar[carController] = new RaceProgress();
+                progressByCar[carController] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
             }
         }
 
@@ -112,6 +112,11 @@ public class RaceManager : MonoBehaviour {
         if (countdownTimer < 0f) {
             isCountdownFinished = true;
             EnableDrivers();
+
+            foreach (RaceProgress progress in progressByCar.Values) {
+                progress.StartRace();
+            }
+            
             OnDrivingStart?.Invoke();
         }
     }
@@ -133,15 +138,16 @@ public class RaceManager : MonoBehaviour {
         if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue) {
             raceProgress.lapsCompleted++;
         }
-        
+
         if (raceProgress.lapsCompleted >= lapsNeededToFinish) {
             Debug.Log("Race has been completed.");
+            raceProgress.CompleteRace();
             OnRaceEnd?.Invoke();
         }
 
         raceProgress.previousCheckpointId = raceProgress.nextCheckpointId;
-        raceProgress.nextCheckpointId++; 
-        raceProgress.nextCheckpointId %= checkpoints.Count; 
+        raceProgress.nextCheckpointId++;
+        raceProgress.nextCheckpointId %= checkpoints.Count;
     }
 
     private void EnableDrivers() {
@@ -176,10 +182,66 @@ public class RaceManager : MonoBehaviour {
     }
 
     public class RaceProgress {
+        public bool isComplete { get; private set; }
+        public int racePosition = 0;
+        public float time;
+
+        public float raceCompletionPercent { get; private set; }
+        public int lapsCompleted = 0;
+        public float lapCompletionPercent = 0f;
+        public int checkpointsCompleted = 0;
+
         public int nextCheckpointId = 0;
         public int previousCheckpointId = int.MinValue;
-        public int lapsCompleted = 0;
-        public float lapProgress = 0f;
-        public int racePosition = 0;
+
+        private float lapWeight;
+        private float checkpointWeight;
+        private float startTime;
+
+        public RaceProgress(int totalLaps, int totalCheckpoints) {
+            lapWeight = 1f / totalLaps;
+            checkpointWeight = 1f / totalCheckpoints;
+        }
+
+        public void CompleteRace() {
+            isComplete = true;
+            raceCompletionPercent = 1f;
+        }
+
+        public void StartRace() {
+            startTime = Time.time;
+            time = Time.time - startTime;
+        }
+
+        public void UpdateProgress(
+            Vector3 racerPosition,
+            Vector3 prevCheckpointPosition,
+            Vector3 nextCheckpointPosition
+        ) {
+            UpdateTime();
+            UpdateLapCompletionPercent(racerPosition, prevCheckpointPosition, nextCheckpointPosition);
+            UpdateRaceCompletionPercent();
+        }
+
+        private void UpdateRaceCompletionPercent() {
+            raceCompletionPercent = lapsCompleted * lapWeight + lapWeight * lapCompletionPercent;
+        }
+
+        private void UpdateLapCompletionPercent(
+            Vector3 racerPosition,
+            Vector3 prevCheckpointPosition,
+            Vector3 nextCheckpointPosition
+        ) {
+            float totalDistance = Vector3.Distance(prevCheckpointPosition, nextCheckpointPosition);
+            float remainingDistance = Vector3.Distance(racerPosition, nextCheckpointPosition);
+            float chekpointCompletionPercent = (1f - remainingDistance) / totalDistance;
+
+            lapCompletionPercent = (checkpointWeight * checkpointsCompleted)
+                                   + (checkpointWeight * chekpointCompletionPercent);
+        }
+
+        private void UpdateTime() {
+            time = Time.time - startTime;
+        }
     }
 }
