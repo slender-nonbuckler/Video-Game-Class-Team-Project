@@ -54,6 +54,8 @@ public class RaceManager : MonoBehaviour {
             result.car = car;
             result.position = progress.racePosition;
             result.time = progress.time;
+            
+            results.Add(result);
         }
         
         results.Sort();
@@ -303,7 +305,7 @@ public class RaceManager : MonoBehaviour {
         }
         
         public int CompareTo(RaceProgress other) {
-            return raceCompletionPercent.CompareTo(other.raceCompletionPercent);
+            return -raceCompletionPercent.CompareTo(other.raceCompletionPercent);
         }
 
         private void UpdateRaceCompletionPercent() {
