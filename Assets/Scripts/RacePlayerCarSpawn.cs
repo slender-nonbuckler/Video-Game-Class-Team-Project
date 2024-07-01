@@ -7,9 +7,10 @@ using static UnityEngine.PlayerPrefs;
 public class RacePlayerCarSpawn : MonoBehaviour
 {
     public List<GameObject> carPrefabs;
-    private GameObject selectedCar;
+    public GameObject selectedCar;
     public CinemachineVirtualCamera virtualCamera;
-    void Start()
+
+    void Awake()
     {
         string selectedCarPrefabName = PlayerPrefs.GetString("SelectedCarPrefab");
         selectedCar = InstantiateSelectedCar(selectedCarPrefabName, new Vector3(200f, 10f, 105.5f));
