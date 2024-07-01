@@ -22,7 +22,7 @@ public class RacePauseMenu : MonoBehaviour, IDataPersistence
         }
         if (raceManager != null)
         {
-            raceManager.OnRaceEnd.AddListener(ShowEndGameCanvas);
+            raceManager.OnPlayerFinish.AddListener(ShowEndGameCanvas);
         }
     }
 
@@ -83,7 +83,7 @@ public class RacePauseMenu : MonoBehaviour, IDataPersistence
     {
         if (raceManager != null)
         {
-            raceManager.OnRaceEnd.RemoveListener(ShowEndGameCanvas);
+            raceManager.OnPlayerFinish.RemoveListener(ShowEndGameCanvas);
         }
     }
 
