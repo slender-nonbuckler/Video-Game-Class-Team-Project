@@ -39,6 +39,8 @@ public class RaceManager : MonoBehaviour {
     public bool isRaceFinished { get; private set; } = false;
     private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
 
+    public RacePlayerCarSpawn playerCarSpawnManager;
+
     public List<Transform> GetStartPositions() {
         return startPositions;
     }
@@ -102,6 +104,7 @@ public class RaceManager : MonoBehaviour {
             checkpoints[i].OnPassCheckpoint += HandlePassCheckpoint;
         }
 
+        testRacerGos.Insert(0, playerCarSpawnManager.selectedCar);
         PositionRacers(testRacerGos);
         StartRaceCountdown();
     }
