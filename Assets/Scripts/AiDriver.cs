@@ -137,7 +137,7 @@ public class AiDriver : MonoBehaviour {
 
     private void FindStartTarget() {
         GameObject[] targetGameObjects = GameObject.FindGameObjectsWithTag(AiTarget.START_TAG);
-        if (targetGameObjects == null) {
+        if (targetGameObjects == null || targetGameObjects.Length == 0) {
             return;
         }
 
