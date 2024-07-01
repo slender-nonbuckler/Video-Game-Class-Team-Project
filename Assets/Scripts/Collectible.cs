@@ -47,7 +47,7 @@ public class Collectible : MonoBehaviour, IDataPersistence
         {
             collider.enabled = false;
         }
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f);
         gameObject.SetActive(false);
     }
     private void InitializeRenderer()
