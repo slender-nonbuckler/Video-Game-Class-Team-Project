@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -16,7 +17,9 @@ using UnityEngine.Serialization;
 public class RaceManager : MonoBehaviour {
     public UnityEvent OnRaceCountdown;
     public UnityEvent OnDrivingStart;
-    public UnityEvent OnRaceEnd;
+    public UnityEvent OnRaceFirstRacerFinish;
+    public UnityEvent OnPlayerFinish;
+    public UnityEvent OnRaceFinish;
 
     [Header("References")] [SerializeField]
     private List<Transform> startPositions;
@@ -32,18 +35,32 @@ public class RaceManager : MonoBehaviour {
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
-
+    
+    public bool isRaceFinished { get; private set; } = false;
     private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
 
     public List<Transform> GetStartPositions() {
         return startPositions;
     }
 
-    public List<CarController> GetResults() {
-        throw new NotImplementedException();
+    public List<RaceResult> GetResults() {
+        List<RaceResult> results = new List<RaceResult>();
+        
+        foreach (var entry in progressByCar) {
+            CarController car = entry.Key;
+            RaceProgress progress = entry.Value;
+
+            RaceResult result = new RaceResult();
+            result.car = car;
+            result.position = progress.racePosition;
+            result.time = progress.time;
+        }
+        
+        results.Sort();
+        return results;
     }
 
-    public RaceProgress GetRaceProgress(CarController carController) {
+    public RaceProgress GetRaceProgressFor(CarController carController) {
         return progressByCar[carController];
     }
 
@@ -88,7 +105,13 @@ public class RaceManager : MonoBehaviour {
     }
 
     private void Update() {
+        if (isRaceFinished) {
+            return;
+        }
+        
         UpdateCountdown();
+        UpdateRacerProgress();
+        UpdateIsRaceFinished();
     }
 
     private void OnDrawGizmosSelected() {
@@ -116,9 +139,49 @@ public class RaceManager : MonoBehaviour {
             foreach (RaceProgress progress in progressByCar.Values) {
                 progress.StartRace();
             }
-            
+
             OnDrivingStart?.Invoke();
         }
+    }
+
+    private void UpdateRacerProgress() {
+        foreach (CarController racer in racers) {
+            RaceProgress progress = progressByCar[racer];
+            if (progress == null) {
+                continue;
+            }
+
+            Vector3 racerPosition = racer.gameObject.transform.position;
+            Vector3 nextCheckpointPosition = checkpoints[progress.nextCheckpointId].transform.position;
+            Vector3 prevCheckpointPosition = racerPosition;
+            if (progress.previousCheckpointId >= 0) {
+                prevCheckpointPosition = checkpoints[progress.previousCheckpointId].transform.position;
+            }
+
+            progress.UpdateProgress(racerPosition, prevCheckpointPosition, nextCheckpointPosition);
+        }
+
+        List<RaceProgress> progresses = progressByCar.Values.ToList();
+        progresses.Sort();
+
+        for (int i = 0; i < progresses.Count; i++) {
+            progresses[i].racePosition = i + 1;
+        }
+    }
+
+    private void UpdateIsRaceFinished() {
+        foreach (RaceProgress progress in progressByCar.Values) {
+            if (progress.isComplete == false) {
+                return;
+            }
+        }
+        
+        EndRace();
+    }
+
+    private void EndRace() {
+        isRaceFinished = true;
+        OnRaceFinish?.Invoke();
     }
 
     private void HandlePassCheckpoint(object sender, CarController carController) {
@@ -135,14 +198,22 @@ public class RaceManager : MonoBehaviour {
             return;
         }
 
+        raceProgress.checkpointsCompleted++;
+
         if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue) {
             raceProgress.lapsCompleted++;
+            raceProgress.checkpointsCompleted = 0;
         }
 
         if (raceProgress.lapsCompleted >= lapsNeededToFinish) {
             Debug.Log("Race has been completed.");
             raceProgress.CompleteRace();
-            OnRaceEnd?.Invoke();
+            OnRaceFirstRacerFinish?.Invoke();
+
+            if (isPlayer(carController)) {
+                OnPlayerFinish?.Invoke();
+                EndRace();
+            }
         }
 
         raceProgress.previousCheckpointId = raceProgress.nextCheckpointId;
@@ -181,7 +252,11 @@ public class RaceManager : MonoBehaviour {
         }
     }
 
-    public class RaceProgress {
+    private bool isPlayer(CarController carController) {
+        return carController.GetComponent<PlayerDriver>() != null;
+    }
+
+    public class RaceProgress: IComparable<RaceProgress> {
         public bool isComplete { get; private set; }
         public int racePosition = 0;
         public float time;
@@ -218,9 +293,17 @@ public class RaceManager : MonoBehaviour {
             Vector3 prevCheckpointPosition,
             Vector3 nextCheckpointPosition
         ) {
+            if (isComplete) {
+                return;
+            }
+
             UpdateTime();
             UpdateLapCompletionPercent(racerPosition, prevCheckpointPosition, nextCheckpointPosition);
             UpdateRaceCompletionPercent();
+        }
+        
+        public int CompareTo(RaceProgress other) {
+            return raceCompletionPercent.CompareTo(other.raceCompletionPercent);
         }
 
         private void UpdateRaceCompletionPercent() {
@@ -242,6 +325,16 @@ public class RaceManager : MonoBehaviour {
 
         private void UpdateTime() {
             time = Time.time - startTime;
+        }
+    }
+    
+    public class RaceResult : IComparable<RaceResult> {
+        public CarController car;
+        public int position;
+        public float time;
+        
+        public int CompareTo(RaceResult other) {
+            return position.CompareTo(other.position);
         }
     }
 }
