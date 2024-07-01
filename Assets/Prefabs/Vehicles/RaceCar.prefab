@@ -933,6 +933,7 @@ GameObject:
   - component: {fileID: 7695142745461179796}
   - component: {fileID: 2925309103391472470}
   - component: {fileID: 7587844310793974039}
+  - component: {fileID: 6376854613611955004}
   m_Layer: 0
   m_Name: RaceCar
   m_TagString: Car
@@ -1110,6 +1111,10 @@ MonoBehaviour:
   carController: {fileID: 7695142745461179796}
   waypoints: []
   target: {fileID: 0}
+  difficulty: 2
+  noiseLerpFactor: 0
+  timeBetweenNoiseChanges: 0.3
+  noiseWeight: 0
 --- !u!82 &7587844310793974039
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1206,6 +1211,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6376854613611955004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7695142745461179804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b68f379f85cf201419186f031e85d2f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cost: 50
 --- !u!1 &7695142745464107534
 GameObject:
   m_ObjectHideFlags: 0

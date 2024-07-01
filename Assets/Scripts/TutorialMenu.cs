@@ -49,8 +49,10 @@ public class TutorialMenu : MonoBehaviour, IDataPersistence
 
     public void FinishTutorial()
     {
+        PlayerPrefs.SetInt("TutorialCompleted", 1);
+        PlayerPrefs.Save();
         SaveAndExit();
-        SceneManager.LoadScene("Menu"); // Update this later when race scene exists
+        SceneManager.LoadScene("Track1v2"); // Update this later when race scene exists
     }
 
     private void SaveAndExit()
