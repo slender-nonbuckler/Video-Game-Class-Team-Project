@@ -69,7 +69,7 @@ public class RaceManager : MonoBehaviour {
     }
 
     public void PositionRacers(List<GameObject> racerGameObjects) {
-        int placementCount = Math.Min(testRacerGos.Count, racerGameObjects.Count);
+        int placementCount = Math.Min(startPositions.Count, racerGameObjects.Count);
         for (int i = 0; i < placementCount; i++) {
             GameObject racer = racerGameObjects[i];
             Transform startPosition = startPositions[i];
@@ -211,6 +211,7 @@ public class RaceManager : MonoBehaviour {
         }
 
         raceProgress.checkpointsCompleted++;
+        Debug.Log($"{carController} passed checkpoint {checkpoint.id}");
 
         if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue) {
             raceProgress.lapsCompleted++;
