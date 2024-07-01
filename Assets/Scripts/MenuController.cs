@@ -17,11 +17,11 @@ public class MenuController : MonoBehaviour
 
     public void StartNewGame()
     {
-        Debug.Log("Starting New Game");
         if (dataPersistenceManager != null)
         {
             dataPersistenceManager.NewGame();
-            //Debug.Log("New game created. Loading CarSelection scene.");
+            PlayerPrefs.SetInt("TutorialCompleted", 0);
+            PlayerPrefs.Save();
             SceneManager.LoadScene("CarSelection");
         }
         else

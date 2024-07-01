@@ -48,6 +48,8 @@ public class CarController : MonoBehaviour {
 
     private Vector2 inputs = Vector2.zero;
     private float startHeight;
+    private String currentGameObjectTag;
+
 
 
     //Getters for car selection information display
@@ -71,6 +73,7 @@ public class CarController : MonoBehaviour {
 
     void Start()
     {
+        currentGameObjectTag = gameObject.tag;
         Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
         SyncTireComponentSettings();
 
@@ -94,7 +97,7 @@ public class CarController : MonoBehaviour {
             tireComponent.SetInputs(inputs);
         }
 
-        if (Input.GetButtonDown("Jump")) {
+        if (Input.GetButtonDown("Jump") && currentGameObjectTag == "Player") {
             Reset();
         }
 
