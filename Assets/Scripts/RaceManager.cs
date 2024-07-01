@@ -94,6 +94,7 @@ public class RaceManager : MonoBehaviour {
 
         isCountdownStarted = true;
         countdownTimer = countdownLength;
+        Debug.Log("OnRaceCountdown");
         OnRaceCountdown?.Invoke();
     }
 
@@ -145,6 +146,7 @@ public class RaceManager : MonoBehaviour {
                 progress.StartRace();
             }
 
+            Debug.Log("OnDrivingStart");
             OnDrivingStart?.Invoke();
         }
     }
@@ -175,6 +177,10 @@ public class RaceManager : MonoBehaviour {
     }
 
     private void UpdateIsRaceFinished() {
+        if (progressByCar.Count <= 0) {
+            return;
+        }
+        
         foreach (RaceProgress progress in progressByCar.Values) {
             if (progress.isComplete == false) {
                 return;
@@ -186,6 +192,7 @@ public class RaceManager : MonoBehaviour {
 
     private void EndRace() {
         isRaceFinished = true;
+        Debug.Log("OnRaceFinish");
         OnRaceFinish?.Invoke();
     }
 
@@ -211,11 +218,12 @@ public class RaceManager : MonoBehaviour {
         }
 
         if (raceProgress.lapsCompleted >= lapsNeededToFinish) {
-            Debug.Log("Race has been completed.");
             raceProgress.CompleteRace();
+            Debug.Log("OnRaceFirstRacerFinish");
             OnRaceFirstRacerFinish?.Invoke();
 
             if (isPlayer(carController)) {
+                Debug.Log("OnPlayerFinish");
                 OnPlayerFinish?.Invoke();
                 EndRace();
             }
