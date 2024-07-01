@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public class CarSelectionManager : MonoBehaviour, IDataPersistence
 {
     public List<GameObject> allCarPrefabs;
-    private List<GameObject> unlockedCarPrefabs;
-    private List<GameObject> lockedCarPrefabs;
+    private List<GameObject> unlockedCarPrefabs = new List<GameObject>();
+    private List<GameObject> lockedCarPrefabs = new List<GameObject>();
     public TMPro.TextMeshProUGUI carInfoText;
     public TMPro.TextMeshProUGUI playerMoneyText;
     private int currentCarIndex = 0;
