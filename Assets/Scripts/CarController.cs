@@ -74,7 +74,7 @@ public class CarController : MonoBehaviour {
     void Start()
     {
         currentGameObjectTag = gameObject.tag;
-        Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
+        //Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
         SyncTireComponentSettings();
 
         if (centerOfMass != null) {
@@ -141,11 +141,11 @@ public class CarController : MonoBehaviour {
     }
 
     private void SyncTireComponentSettings() {
-        Debug.Log($"SyncTireComponentSettings - Current topSpeed: {topSpeed}");
+       // Debug.Log($"SyncTireComponentSettings - Current topSpeed: {topSpeed}");
         foreach (TireComponent tireComponent in tireComponents) {
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
-            Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
+            //Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
             tireComponent.torqueCurve = torqueCurve;
             tireComponent.maxSteeringAngle = maxSteeringAngle;
 

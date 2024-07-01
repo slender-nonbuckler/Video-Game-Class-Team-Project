@@ -31,7 +31,7 @@ public class RaceManager : MonoBehaviour {
     [Header("Parameters")] [SerializeField]
     private float countdownLength = 3f;
 
-    [SerializeField] private int lapsNeededToFinish = 3;
+    [SerializeField] private int lapsNeededToFinish = 1;
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
@@ -196,7 +196,7 @@ public class RaceManager : MonoBehaviour {
         RaceProgress raceProgress = progressByCar[carController];
 
         if (checkpoint.id != raceProgress.nextCheckpointId) {
-            Debug.Log("Checkpoint visited in wrong order");
+            //Debug.Log("Checkpoint visited in wrong order");
             return;
         }
 
