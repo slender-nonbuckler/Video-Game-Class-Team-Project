@@ -2,12 +2,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class RacePauseMenu : MonoBehaviour
+public class RacePauseMenu : MonoBehaviour, IDataPersistence
 {
     public Canvas PauseCanvas;
     public Canvas EndGameCanvas;
     private bool isPaused = false;
     public RaceManager raceManager;
+    private int currentMoney;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,11 +59,13 @@ public class RacePauseMenu : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        DataPersistentManager.instance.SaveGame();
         SceneManager.LoadScene("Menu");
     }
     public void QuitGame()
     {
         Time.timeScale = 1f;
+        DataPersistentManager.instance.SaveGame();
         Application.Quit();
     }
     public void RestartRound()
@@ -73,6 +76,7 @@ public class RacePauseMenu : MonoBehaviour
     public void RaceAgain()
     {
         Time.timeScale = 1f;
+        DataPersistentManager.instance.SaveGame();
         SceneManager.LoadScene("Track1v2");
     }
     private void OnDisable()
@@ -81,5 +85,17 @@ public class RacePauseMenu : MonoBehaviour
         {
             raceManager.OnRaceEnd.RemoveListener(ShowEndGameCanvas);
         }
+    }
+
+    public void LoadData(GameData data)
+    {
+        this.currentMoney = data.Money;
+        Debug.Log($"Loaded Money: {this.currentMoney}");
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        // We don't need to modify the money here, as the Collectible script will handle it
+        Debug.Log($"Current Money: {data.Money}");
     }
 }
