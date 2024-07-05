@@ -32,15 +32,11 @@ public class AiFlowCircle : MonoBehaviour {
     }
 
     private bool isChanged() {
-        if (
+        return (
             numOfPoints != _numOfPoints
             || radius != _radius
             || angleOffset != _angleOffset
-        ) {
-            return true;
-        }
-
-        return false;
+        );
     }
 
     private bool isNumOfPointsChanged() {
@@ -71,7 +67,7 @@ public class AiFlowCircle : MonoBehaviour {
 
     private void DestroyPoints() {
         while (transform.childCount > 0) {
-            DestroyImmediate(transform.GetChild(0).gameObject);
+            Destroy(transform.GetChild(0).gameObject);
         }
     }
 
