@@ -7,7 +7,7 @@ public class AiWaypoint : MonoBehaviour {
     [SerializeField] private Transform pointTowards;
     private static float rayLength = 5;
     private static float sphereRadius = 2;
-    
+
     public const string TAG = "AiWaypoint";
 
     private void OnDrawGizmos() {
@@ -22,6 +22,10 @@ public class AiWaypoint : MonoBehaviour {
     }
 
     private void Update() {
+        if (!CompareTag(TAG)) {
+            tag = TAG;
+        }
+
         if (!pointTowards) {
             return;
         }

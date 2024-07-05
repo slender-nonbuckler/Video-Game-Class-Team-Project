@@ -54,7 +54,6 @@ public class AiFlowCircle : MonoBehaviour {
     private void MakePoints() {
         for (int i = 0; i < numOfPoints; i++) {
             GameObject point = new GameObject($"{name}:{i}", typeof(AiWaypoint));
-            point.tag = AiWaypoint.TAG;
             point.transform.parent = transform;
         }
     }
