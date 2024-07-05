@@ -17,10 +17,6 @@ public class AiFlowCircle : MonoBehaviour {
     private float pow = 0.5f;
     private float turnFraction = 1.618033988749f;
 
-    private void Awake() {
-        MakePoints();
-    }
-
     void Update() {
         if (!isChanged()) {
             return;
