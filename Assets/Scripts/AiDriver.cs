@@ -64,6 +64,8 @@ public class AiDriver : MonoBehaviour {
     private void OnDrawGizmos() {
         Vector3 relativeInput = transform.forward * input.y + transform.right * input.x;
         Debug.DrawLine(transform.position, transform.position + relativeInput * 10, Color.red);
+        Vector3 relativeNoise = transform.forward * currNoise.y + transform.right * currNoise.x;
+        Debug.DrawLine(transform.position, transform.position + relativeNoise * 10 * noiseWeight);
     }
 
     private Vector2 GetDifficultyInputNoise() {
@@ -72,8 +74,6 @@ public class AiDriver : MonoBehaviour {
         }
         UpdateInputNoise();
         currNoise = Vector2.Lerp(currNoise, targetNoise, noiseLerpFactor);
-        Vector3 relativeNoise = transform.forward * currNoise.y + transform.right * currNoise.x;
-        Debug.DrawLine(transform.position, transform.position + relativeNoise * 10);
         return currNoise * noiseWeight;
     }
 
