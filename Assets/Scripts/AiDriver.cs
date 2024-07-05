@@ -35,9 +35,11 @@ public class AiDriver : MonoBehaviour {
     private Vector2 targetNoise = Vector2.zero;
     
     private Vector2 input;
+
+    private AiDataManager aiDataManager;
     
     void Start() {
-        FindWaypoints();
+        FindAiDataManager();
         FindStartTarget();
         SyncDifficultySettings();
     }
@@ -128,11 +130,13 @@ public class AiDriver : MonoBehaviour {
         }
     }
 
-    private void FindWaypoints() {
-        GameObject[] waypointGameObjects = GameObject.FindGameObjectsWithTag(AiWaypoint.TAG);
-        foreach (GameObject waypoint in waypointGameObjects) {
-            waypoints.Add(waypoint.transform);
+    private void FindAiDataManager() {
+        GameObject gameObjectWithTag = GameObject.FindGameObjectWithTag(AiDataManager.TAG);
+        if (!gameObjectWithTag) {
+            return;
         }
+
+        aiDataManager = gameObjectWithTag.GetComponent<AiDataManager>();
     }
 
     private void FindStartTarget() {
@@ -154,10 +158,14 @@ public class AiDriver : MonoBehaviour {
     }
 
     private Transform GetNearestWaypoint() {
+        if (!aiDataManager) {
+            return null;
+        }
+        
         Transform nearest = null;
         float minDistance = Mathf.Infinity;
 
-        foreach (Transform waypoint in waypoints) {
+        foreach (Transform waypoint in aiDataManager.GetWaypoints()) {
             float distance = Vector3.Distance(transform.position, waypoint.position);
             if (distance < minDistance) {
                 nearest = waypoint;
