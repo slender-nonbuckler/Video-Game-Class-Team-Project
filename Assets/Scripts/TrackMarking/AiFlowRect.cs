@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -60,7 +58,7 @@ public class AiFlowRect : MonoBehaviour {
     
     private void DestroyPoints() {
         while (transform.childCount > 0) {
-            //Destroy(transform.GetChild(0).gameObject);
+            DestroyImmediate(transform.GetChild(0).gameObject);
         }
     }
     

@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using Quaternion = System.Numerics.Quaternion;
 
 [ExecuteInEditMode]
 public class AiFlowCircle : MonoBehaviour {
@@ -67,7 +62,7 @@ public class AiFlowCircle : MonoBehaviour {
 
     private void DestroyPoints() {
         while (transform.childCount > 0) {
-            Destroy(transform.GetChild(0).gameObject);
+            DestroyImmediate(transform.GetChild(0).gameObject);
         }
     }
 
