@@ -165,7 +165,7 @@ public class AiDriver : MonoBehaviour {
         Transform nearest = null;
         float minDistance = Mathf.Infinity;
 
-        foreach (Transform waypoint in aiDataManager.GetWaypoints()) {
+        foreach (Transform waypoint in aiDataManager.GetWaypointsNearby(transform.position, 20f)) {
             float distance = Vector3.Distance(transform.position, waypoint.position);
             if (distance < minDistance) {
                 nearest = waypoint;
