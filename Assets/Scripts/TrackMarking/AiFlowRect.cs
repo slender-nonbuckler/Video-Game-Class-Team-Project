@@ -87,7 +87,7 @@ public class AiFlowRect : MonoBehaviour {
 
             Transform point = transform.GetChild(i);
             point.localPosition = new Vector3(x, 0f, z);
-            point.localRotation = UnityEngine.Quaternion.Euler(0f, angleOffset, 0f);
+            point.localRotation = Quaternion.Euler(0f, angleOffset, 0f);
         }
     }
 }
