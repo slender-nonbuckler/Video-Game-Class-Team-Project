@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -10,34 +11,33 @@ public class AiDriver : MonoBehaviour {
         Hard,
         Expert
     }
-    
+
     Vector2 INVALID_VECTOR2 = Vector2.positiveInfinity;
-    
+
     [Header("References")] [SerializeField]
     private CarController carController;
 
     [SerializeField] private List<Transform> waypoints;
     [SerializeField] private Transform target;
 
-    [Header("Parameters")] 
-    [SerializeField]
+    [Header("Parameters")] [SerializeField]
     private Difficulty difficulty = Difficulty.Medium;
-    private Difficulty prevDifficulty = Difficulty.Pushover;
-    
 
-    [Range(0f, 1f)]
-    [SerializeField] private float noiseLerpFactor = 0f;
+    private Difficulty prevDifficulty = Difficulty.Pushover;
+
+
+    [Range(0f, 1f)] [SerializeField] private float noiseLerpFactor = 0f;
     [SerializeField] private float timeBetweenNoiseChanges = 0.3f;
     [SerializeField] [Range(0f, 1f)] private float noiseWeight = 0f;
-    
+
     private float timeTillNextNoiseChange = 0f;
     private Vector2 currNoise = Vector2.zero;
     private Vector2 targetNoise = Vector2.zero;
-    
+
     private Vector2 input;
 
     private AiDataManager aiDataManager;
-    
+
     void Start() {
         FindAiDataManager();
         FindStartTarget();
@@ -53,7 +53,7 @@ public class AiDriver : MonoBehaviour {
             GetInputToMatchNearestWaypoint(),
             GetInputToNextTarget()
         };
-        
+
         Vector2 carInput = GetWeightedInput(desiredInputs) + GetDifficultyInputNoise();
         input = carInput;
         carController.SetInputs(carInput);
@@ -74,6 +74,7 @@ public class AiDriver : MonoBehaviour {
         if (difficulty != prevDifficulty) {
             SyncDifficultySettings();
         }
+
         UpdateInputNoise();
         currNoise = Vector2.Lerp(currNoise, targetNoise, noiseLerpFactor);
         return currNoise * noiseWeight;
@@ -87,25 +88,25 @@ public class AiDriver : MonoBehaviour {
                 timeBetweenNoiseChanges = 1f;
                 noiseLerpFactor = 0.05f;
                 break;
-            
+
             case Difficulty.Easy:
                 noiseWeight = 0.5f;
                 timeBetweenNoiseChanges = 0.75f;
                 noiseLerpFactor = 0.1f;
                 break;
-            
+
             case Difficulty.Medium:
                 noiseWeight = 0.25f;
                 timeBetweenNoiseChanges = 0.5f;
                 noiseLerpFactor = 0.2f;
                 break;
-            
+
             case Difficulty.Hard:
                 noiseWeight = 0.125f;
                 timeBetweenNoiseChanges = 0.25f;
                 noiseLerpFactor = 0.4f;
                 break;
-            
+
             case Difficulty.Expert:
                 noiseWeight = 0f;
                 break;
@@ -125,9 +126,12 @@ public class AiDriver : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         AiTarget aiTarget = other.GetComponent<AiTarget>();
-        if (aiTarget) {
-            UpdateTarget(aiTarget);
-        }
+        UpdateTarget(aiTarget);
+    }
+
+    private void OnTriggerStay(Collider other) {
+        AiTarget aiTarget = other.GetComponent<AiTarget>();
+        UpdateTarget(aiTarget);
     }
 
     private void FindAiDataManager() {
@@ -161,11 +165,15 @@ public class AiDriver : MonoBehaviour {
         if (!aiDataManager) {
             return null;
         }
-        
+
         Transform nearest = null;
         float minDistance = Mathf.Infinity;
 
         foreach (Transform waypoint in aiDataManager.GetWaypointsNearby(transform.position, 20f)) {
+            if (!waypoint) {
+                continue;
+            }
+            
             float distance = Vector3.Distance(transform.position, waypoint.position);
             if (distance < minDistance) {
                 nearest = waypoint;
@@ -205,6 +213,9 @@ public class AiDriver : MonoBehaviour {
     }
 
     private void UpdateTarget(AiTarget aiTarget) {
+        if (!aiTarget) {
+            return;
+        }
         target = aiTarget.GetNextTarget();
     }
 
