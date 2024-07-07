@@ -23,27 +23,31 @@ namespace Common {
             HashSet<Transform> nearby = new HashSet<Transform>();
             Vector2Int minCellIndex = PositionToCellIndex(new Vector3(position.x - radius, 0, position.z - radius));
             Vector2Int maxCellIndex = PositionToCellIndex(new Vector3(position.x + radius, 0, position.z + radius));
-
-            for (int i = minCellIndex.x; i < maxCellIndex.x; i++) {
-                for (int j = minCellIndex.y; j < maxCellIndex.y; j++) {
+            
+            for (int i = minCellIndex.x; i <= maxCellIndex.x; i++) {
+                for (int j = minCellIndex.y; j <= maxCellIndex.y; j++) {
                     Vector2Int cellIndex = new Vector2Int(i, j);
                     if (IsInSpatialGrid(cellIndex)) {
                         nearby.UnionWith(cells[cellIndex]);
                     }
                 }
             }
-
+            
             return nearby;
         }
 
         public void AddItem(Transform transform) {
             Vector2Int cellIndex = PositionToCellIndex(transform.position);
-            cells[cellIndex].Add(transform);
+            if (IsInSpatialGrid(cellIndex)) {
+                cells[cellIndex].Add(transform);
+            }
         }
 
         public void RemoveItem(Transform transform) {
             Vector2Int cellIndex = PositionToCellIndex(transform.position);
-            cells[cellIndex].Remove(transform);
+            if (IsInSpatialGrid(cellIndex)) {
+                cells[cellIndex].Remove(transform);
+            }
         }
 
         private Vector2Int PositionToCellIndex(Vector3 position) {
@@ -57,10 +61,10 @@ namespace Common {
         }
 
         private bool IsInSpatialGrid(Vector2Int index) {
-            return index.x < 0
-                   || index.y < 0
-                   || index.x >= dimensions.x
-                   || index.y >= dimensions.y;
+            return !(index.x < 0
+                     || index.y < 0
+                     || index.x >= dimensions.x
+                     || index.y >= dimensions.y);
         }
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 [ExecuteInEditMode]
 public class AiFlowRect : MonoBehaviour {
-    [SerializeField] private float width = 100f;
+    [SerializeField] private float width = 30f;
     private float _width;
     [SerializeField] private float length = 100f;
     private float _height;
@@ -13,9 +13,9 @@ public class AiFlowRect : MonoBehaviour {
     [SerializeField] private float angleOffset;
     private float _angleOffset;
 
-    [SerializeField] private float marginWidth = 10f;
+    [SerializeField] private float marginWidth = 35f;
     private float _marginWidth;
-    [SerializeField] private float marginAngleOffset;
+    [SerializeField] private float marginAngleOffset = -90f;
     private float _marginAngleOffset;
 
     void Update() {
