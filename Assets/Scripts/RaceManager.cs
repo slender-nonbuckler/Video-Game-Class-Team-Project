@@ -4,6 +4,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
+using TMPro;  // Add this line for TextMeshPro
 
 /**
  * In charge of an individual racetrack, its setup progress and completion.
@@ -35,7 +37,14 @@ public class RaceManager : MonoBehaviour {
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
-    
+
+    // HUD: player {position, lap finished, time};
+    [Header("UI Elements")]
+    [SerializeField] private TMP_Text PlayerPosition;
+    [SerializeField] private TMP_Text lapInfoText;
+    [SerializeField] private TMP_Text elapsedTimeText;
+   
+
     public bool isRaceFinished { get; private set; } = false;
     private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
 
@@ -174,7 +183,45 @@ public class RaceManager : MonoBehaviour {
         for (int i = 0; i < progresses.Count; i++) {
             progresses[i].racePosition = i + 1;
         }
+
+        // Update player's position HUD
+        UpdatePlayerPositionHUD();
+
+        // Update lap info HUD
+        UpdateLapInfoText();
+
+
     }
+    /**
+     *Added method to player current position;
+        
+      */
+    private void UpdatePlayerPositionHUD()
+    {
+        CarController playerCar = playerCarSpawnManager.selectedCar.GetComponent<CarController>();
+        if (progressByCar.TryGetValue(playerCar, out var playerProgress))
+        {
+            PlayerPosition.text = $"POS: {playerProgress.racePosition}";
+            //PlayerPosition.text = $"Position: {playerProgress.racePosition}/{racers.Count}";
+        }
+    }
+    /**
+     *Added method to display lap finished/total laps
+        
+      */
+    private void UpdateLapInfoText()
+    {
+        if (progressByCar.Count > 0)
+        {
+            RaceProgress firstProgress = progressByCar.Values.First(); // Assuming there's at least one car
+
+            int currentLap = firstProgress.lapsCompleted;
+            int totalLaps = lapsNeededToFinish;
+
+            lapInfoText.text = $"LAP {currentLap} / {totalLaps}";
+        }
+    }
+
 
     private void UpdateIsRaceFinished() {
         if (progressByCar.Count <= 0) {
