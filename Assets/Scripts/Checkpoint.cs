@@ -16,10 +16,6 @@ public class Checkpoint : MonoBehaviour {
     public event EventHandler<CarController> OnPassCheckpoint;
     
     private void OnTriggerEnter(Collider other) {
-        if (!other.attachedRigidbody.CompareTag("Car")) {
-             return;
-        }
-
         CarController carController = other.attachedRigidbody.GetComponent<CarController>();
         if (!carController) {
             return;

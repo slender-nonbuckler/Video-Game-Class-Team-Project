@@ -8,8 +8,8 @@ using UnityEngine.UI;
 public class CarSelectionManager : MonoBehaviour, IDataPersistence
 {
     public List<GameObject> allCarPrefabs;
-    private List<GameObject> unlockedCarPrefabs;
-    private List<GameObject> lockedCarPrefabs;
+    private List<GameObject> unlockedCarPrefabs = new List<GameObject>();
+    private List<GameObject> lockedCarPrefabs = new List<GameObject>();
     public TMPro.TextMeshProUGUI carInfoText;
     public TMPro.TextMeshProUGUI playerMoneyText;
     private int currentCarIndex = 0;
@@ -284,7 +284,15 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         }
         carPrefab.transform.rotation = originalRotation;
 
-        //TODO: UPDATE THIS TO THE CORRECT PLACE DEPENDING ON WHAT SCENE PRECEDES THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        SceneManager.LoadScene("TutorialScene");
+        if (PlayerPrefs.GetInt("TutorialCompleted", 0) == 0)
+        {
+            // Tutorial hasn't been completed, route to TutorialScene
+            SceneManager.LoadScene("TutorialScene");
+        }
+        else
+        {
+            // Tutorial has been completed, route to Track1v2 scene
+            SceneManager.LoadScene("Track1v2");
+        }
     }
 }

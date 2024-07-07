@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class CarController : MonoBehaviour {
     [Header("References")] [SerializeField]
@@ -48,6 +47,8 @@ public class CarController : MonoBehaviour {
 
     private Vector2 inputs = Vector2.zero;
     private float startHeight;
+    private String currentGameObjectTag;
+
 
 
     //Getters for car selection information display
@@ -66,11 +67,9 @@ public class CarController : MonoBehaviour {
     public float Strength => strength;
     public float Damping => damping;
 
-    public AudioSource carCollisionAudioSource;
-    public AudioClip[] carCollisionSounds;
-
-    void Start() {
-        Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
+    void Start()
+    {
+        currentGameObjectTag = gameObject.tag;
         SyncTireComponentSettings();
 
         if (centerOfMass != null) {
@@ -80,17 +79,15 @@ public class CarController : MonoBehaviour {
         startHeight = transform.position.y;
     }
 
-    private void Awake() {
-        carCollisionAudioSource = GetComponent<AudioSource>();
-    }
-
-    void Update() {
-        foreach (TireComponent tireComponent in tireComponents) {
+    void Update()
+    {
+        foreach (TireComponent tireComponent in tireComponents)
+        {
             //Debug.Log("Setting Tire Inputs: " + inputs);
             tireComponent.SetInputs(inputs);
         }
 
-        if (Input.GetButtonDown("Jump")) {
+        if (Input.GetButtonDown("Jump") && currentGameObjectTag == "Player") {
             Reset();
         }
 
@@ -134,11 +131,9 @@ public class CarController : MonoBehaviour {
     }
 
     private void SyncTireComponentSettings() {
-        Debug.Log($"SyncTireComponentSettings - Current topSpeed: {topSpeed}");
         foreach (TireComponent tireComponent in tireComponents) {
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
-            Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
             tireComponent.torqueCurve = torqueCurve;
             tireComponent.maxSteeringAngle = maxSteeringAngle;
 
@@ -226,14 +221,6 @@ public class CarController : MonoBehaviour {
 
         activePowerups.Clear();
     }
-
-    private void OnCollisionEnter(Collision otherEntity) {
-        if (otherEntity.gameObject.CompareTag("Car")) {
-            carCollisionAudioSource.clip = carCollisionSounds[Random.Range(0, carCollisionSounds.Length)];
-            carCollisionAudioSource.PlayOneShot(carCollisionAudioSource.clip);
-        }
-    }
-
 
     //Helper methods for banana obstacle
     private bool isRotating = false;
