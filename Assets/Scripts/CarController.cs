@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class CarController : MonoBehaviour {
     [Header("References")] [SerializeField]
@@ -71,7 +70,6 @@ public class CarController : MonoBehaviour {
     void Start()
     {
         currentGameObjectTag = gameObject.tag;
-        //Debug.Log($"CarController Start - Initial topSpeed: {topSpeed}");
         SyncTireComponentSettings();
 
         if (centerOfMass != null) {
@@ -133,11 +131,9 @@ public class CarController : MonoBehaviour {
     }
 
     private void SyncTireComponentSettings() {
-       // Debug.Log($"SyncTireComponentSettings - Current topSpeed: {topSpeed}");
         foreach (TireComponent tireComponent in tireComponents) {
             tireComponent.SetAttachedRigidbody(carRigidbody);
             tireComponent.maxSpeed = topSpeed;
-            //Debug.Log($"Set tire component maxSpeed to: {tireComponent.maxSpeed}");
             tireComponent.torqueCurve = torqueCurve;
             tireComponent.maxSteeringAngle = maxSteeringAngle;
 
@@ -224,5 +220,77 @@ public class CarController : MonoBehaviour {
         }
 
         activePowerups.Clear();
+    }
+
+    //Helper methods for banana obstacle
+    private bool isRotating = false;
+
+    // Add this method to handle car rotation
+    public void RotateCar() {
+        if (!isRotating) {
+            StartCoroutine(RotateCarCoroutine());
+        }
+    }
+
+    private IEnumerator RotateCarCoroutine() {
+        isRotating = true;
+        float rotationDuration = 3f; // Duration for three circles
+        float rotationSpeed = 360f; // Degrees per second (one circle per second)
+        float elapsedTime = 0f;
+
+        while (elapsedTime < rotationDuration) {
+            float rotationAmount = rotationSpeed * Time.deltaTime;
+            transform.Rotate(Vector3.up, rotationAmount);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        isRotating = false;
+    }
+
+    //Helper methods for arresting obstacle
+    private float currentSpeed; // This will be modified during gameplay
+    private Collider carCollider;
+
+
+    public void ApplySpeedReduction(float reductionFactor, float minSpeed) {
+        foreach (TireComponent tireComponent in tireComponents) {
+            // Access the Rigidbody attached to the tire component
+            Rigidbody tireRigidbody = tireComponent.rigidbodyAttachedTo;
+
+            if (tireRigidbody != null) {
+                // Get current velocity and reduce it
+                Vector3 currentVelocity = tireRigidbody.velocity;
+                Vector3 reducedVelocity = currentVelocity * reductionFactor;
+
+                // Ensure reduced speed doesn't fall below minimum speed
+                reducedVelocity = Vector3.ClampMagnitude(reducedVelocity, minSpeed);
+
+                // Apply the reduced velocity back to the Rigidbody
+                tireRigidbody.velocity = reducedVelocity;
+
+                Debug.Log($"Tire component speed set to: {reducedVelocity.magnitude}");
+            }
+            else {
+                Debug.LogWarning("No Rigidbody attached to TireComponent.");
+            }
+        }
+    }
+
+    public void RemoveSpeedReduction() {
+        foreach (TireComponent tireComponent in tireComponents) {
+            // Access the Rigidbody attached to the tire component
+            Rigidbody tireRigidbody = tireComponent.rigidbodyAttachedTo;
+
+            if (tireRigidbody != null) {
+                // Restore the original speed (or top speed)
+                tireRigidbody.velocity = tireRigidbody.velocity.normalized * tireComponent.maxSpeed;
+
+                Debug.Log($"Tire component speed reset to: {tireComponent.maxSpeed}");
+            }
+            else {
+                Debug.LogWarning("No Rigidbody attached to TireComponent.");
+            }
+        }
     }
 }
