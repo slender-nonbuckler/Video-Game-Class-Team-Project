@@ -35,6 +35,7 @@ public class AiDriver : MonoBehaviour {
     private Vector2 targetNoise = Vector2.zero;
     
     private Vector2 input;
+    private bool isReseting;
     
     void Start() {
         FindWaypoints();
@@ -54,7 +55,7 @@ public class AiDriver : MonoBehaviour {
         
         Vector2 carInput = GetWeightedInput(desiredInputs) + GetDifficultyInputNoise();
         input = carInput;
-        carController.SetInputs(carInput);
+        carController.SetInputs(carInput, isReseting);
     }
 
     public void SetDifficulty(Difficulty difficulty) {
