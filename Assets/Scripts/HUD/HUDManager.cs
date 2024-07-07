@@ -36,6 +36,7 @@ public class HUDManager : MonoBehaviour
 
         // Update lap completed HUD
         UpdateLapInfoText(carProgress, lapsNeededToFinish);
+
     }
 
     private void UpdateLapInfoText(Dictionary<CarController, RaceManager.RaceProgress> carProgress, int lapsNeededToFinish)

@@ -198,6 +198,8 @@ public class RaceManager : MonoBehaviour {
         return lapsNeededToFinish;
     }
 
+
+
     private void UpdateIsRaceFinished() {
         if (progressByCar.Count <= 0) {
             return;
