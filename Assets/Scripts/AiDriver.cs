@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -11,9 +10,9 @@ public class AiDriver : MonoBehaviour {
         Hard,
         Expert
     }
-
+    
     Vector2 INVALID_VECTOR2 = Vector2.positiveInfinity;
-
+    
     [Header("References")] [SerializeField]
     private CarController carController;
 
@@ -22,9 +21,8 @@ public class AiDriver : MonoBehaviour {
 
     [Header("Parameters")] [SerializeField]
     private Difficulty difficulty = Difficulty.Medium;
-
     private Difficulty prevDifficulty = Difficulty.Pushover;
-
+    
 
     [Range(0f, 1f)] [SerializeField] private float noiseLerpFactor = 0f;
     [SerializeField] private float timeBetweenNoiseChanges = 0.3f;
@@ -34,8 +32,14 @@ public class AiDriver : MonoBehaviour {
     private Vector2 currNoise = Vector2.zero;
     private Vector2 targetNoise = Vector2.zero;
 
+    [SerializeField] private float resetThreshold = 10f;
+    [SerializeField] private float resetUtility;
+    private float resetUtilityLossDistance = 3f;
+    private Vector3 previousPosition = Vector3.zero;
+    
     private Vector2 input;
-
+    private bool isReseting;
+    
     private AiDataManager aiDataManager;
 
     void Start() {
@@ -55,8 +59,12 @@ public class AiDriver : MonoBehaviour {
         };
 
         Vector2 carInput = GetWeightedInput(desiredInputs) + GetDifficultyInputNoise();
+        
+        UpdateResetUtility();
+        
         input = carInput;
-        carController.SetInputs(carInput);
+        isReseting = resetUtility > resetThreshold;
+        carController.SetInputs(carInput, isReseting);
     }
 
     public void SetDifficulty(Difficulty difficulty) {
@@ -122,6 +130,23 @@ public class AiDriver : MonoBehaviour {
 
         targetNoise = Random.insideUnitCircle;
         timeTillNextNoiseChange = Time.time + timeBetweenNoiseChanges;
+    }
+
+    private void UpdateResetUtility() {
+        if (resetUtility > resetThreshold * 1.1f) {
+            resetUtility = 0f;
+        }
+        
+        float distanceFromLastPosition = Vector3.Distance(previousPosition, transform.position);
+        if (distanceFromLastPosition < resetUtilityLossDistance * Time.deltaTime) {
+            resetUtility += (resetUtilityLossDistance - distanceFromLastPosition) * Time.deltaTime;
+        }
+        else {
+            resetUtility /= 2f;
+        }
+        
+        resetUtility = Mathf.Max(0f, resetUtility);
+        previousPosition = transform.position;
     }
 
     private void OnTriggerEnter(Collider other) {

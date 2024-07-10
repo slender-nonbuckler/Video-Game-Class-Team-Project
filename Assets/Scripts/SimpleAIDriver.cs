@@ -88,7 +88,7 @@ public class SimpleAIDriver : MonoBehaviour
             }
         }
 
-        carController.SetInputs(newInputs);
+        carController.SetInputs(newInputs, false);
     }
 
     public void SetTargetPosition(Vector3 target)
