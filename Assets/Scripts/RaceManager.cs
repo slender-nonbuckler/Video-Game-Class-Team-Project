@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
+
 /**
  * In charge of an individual racetrack, its setup progress and completion.
  *
@@ -19,7 +20,7 @@ public class RaceManager : MonoBehaviour {
     public UnityEvent OnDrivingStart;
     public UnityEvent OnRaceFirstRacerFinish;
     public UnityEvent OnPlayerFinish;
-    public UnityEvent OnRaceFinish;
+    public UnityEvent OnRaceFinish; 
 
     [Header("References")] [SerializeField]
     private List<Transform> startPositions;
@@ -35,7 +36,8 @@ public class RaceManager : MonoBehaviour {
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
-    
+   
+
     public bool isRaceFinished { get; private set; } = false;
     private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
 
@@ -151,17 +153,21 @@ public class RaceManager : MonoBehaviour {
         }
     }
 
-    private void UpdateRacerProgress() {
-        foreach (CarController racer in racers) {
+    private void UpdateRacerProgress()
+    {
+        foreach (CarController racer in racers)
+        {
             RaceProgress progress = progressByCar[racer];
-            if (progress == null) {
+            if (progress == null)
+            {
                 continue;
             }
 
             Vector3 racerPosition = racer.gameObject.transform.position;
             Vector3 nextCheckpointPosition = checkpoints[progress.nextCheckpointId].transform.position;
             Vector3 prevCheckpointPosition = racerPosition;
-            if (progress.previousCheckpointId >= 0) {
+            if (progress.previousCheckpointId >= 0)
+            {
                 prevCheckpointPosition = checkpoints[progress.previousCheckpointId].transform.position;
             }
 
@@ -171,10 +177,28 @@ public class RaceManager : MonoBehaviour {
         List<RaceProgress> progresses = progressByCar.Values.ToList();
         progresses.Sort();
 
-        for (int i = 0; i < progresses.Count; i++) {
+        for (int i = 0; i < progresses.Count; i++)
+        {
             progresses[i].racePosition = i + 1;
         }
     }
+
+    /**
+     * The following method used to obtain progressByCar and lapsneededtofinish 
+     * for HUDManager, because progressByCar and lapsneededtofinish are set to
+     * be private in this class.
+     */
+    public Dictionary<CarController, RaceProgress> GetProgressByCar()
+    {
+        return progressByCar;
+    }
+
+    public int GetLapsNeededToFinish()
+    {
+        return lapsNeededToFinish;
+    }
+
+
 
     private void UpdateIsRaceFinished() {
         if (progressByCar.Count <= 0) {
