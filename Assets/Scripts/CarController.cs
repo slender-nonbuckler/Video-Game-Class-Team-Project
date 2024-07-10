@@ -46,9 +46,12 @@ public class CarController : MonoBehaviour {
     [SerializeField] public bool isShowingWheelContact = false;
 
     private Vector2 inputs = Vector2.zero;
+    private bool isResetDown;
     private float startHeight;
     private String currentGameObjectTag;
 
+    private float resetCooldown = 2f;
+    private float resetCooloffTime = 0f;
 
 
     //Getters for car selection information display
@@ -83,11 +86,10 @@ public class CarController : MonoBehaviour {
     {
         foreach (TireComponent tireComponent in tireComponents)
         {
-            //Debug.Log("Setting Tire Inputs: " + inputs);
             tireComponent.SetInputs(inputs);
         }
 
-        if (Input.GetButtonDown("Jump") && currentGameObjectTag == "Player") {
+        if (isResetDown) {
             Reset();
         }
 
@@ -101,8 +103,9 @@ public class CarController : MonoBehaviour {
         }
     }
 
-    public void SetInputs(Vector2 inputs) {
+    public void SetInputs(Vector2 inputs, bool isResetDown) {
         this.inputs = inputs;
+        this.isResetDown = isResetDown;
     }
 
     private bool getIsGrounded() {
@@ -116,8 +119,16 @@ public class CarController : MonoBehaviour {
     }
 
     private void Reset() {
-        transform.position = new Vector3(transform.position.x, startHeight, transform.position.z);
+        if (resetCooloffTime > Time.time) {
+            return;
+        }
+
+        resetCooloffTime = Time.time + resetCooldown;
+        
+        transform.position = new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z);
         transform.rotation = Quaternion.LookRotation(transform.forward);
+        carRigidbody.angularVelocity = Vector3.zero;
+        carRigidbody.velocity = Vector3.zero;
     }
 
     private void UpdateForceVisualSettings() {
