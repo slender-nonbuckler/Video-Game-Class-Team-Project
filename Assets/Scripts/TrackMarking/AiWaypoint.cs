@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -7,8 +5,35 @@ public class AiWaypoint : MonoBehaviour {
     [SerializeField] private Transform pointTowards;
     private static float rayLength = 5;
     private static float sphereRadius = 2;
-    
+
     public const string TAG = "AiWaypoint";
+
+    private AiDataManager aiDataManager;
+
+    private void Awake() {
+        if (!CompareTag(TAG)) {
+            tag = TAG;
+        }
+    }
+
+    private void Start() {
+        FindAiDataManager();
+        aiDataManager?.AddWaypoint(this);
+    }
+
+    private void Update() {
+        if (!pointTowards) {
+            return;
+        }
+
+        Vector3 relativePos = pointTowards.position - transform.position;
+        Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
+        transform.rotation = rotation;
+    }
+
+    void OnDestroy() {
+        aiDataManager?.RemoveWaypoint(this);
+    }
 
     private void OnDrawGizmos() {
         Gizmos.color = Color.red;
@@ -21,13 +46,12 @@ public class AiWaypoint : MonoBehaviour {
         Gizmos.DrawLine(rayEnd, rayEnd + -transform.up + -transform.forward);
     }
 
-    private void Update() {
-        if (!pointTowards) {
+    private void FindAiDataManager() {
+        GameObject gameObjectWithTag = GameObject.FindGameObjectWithTag(AiDataManager.TAG);
+        if (!gameObjectWithTag) {
             return;
         }
 
-        Vector3 relativePos = pointTowards.position - transform.position;
-        Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-        transform.rotation = rotation;
+        aiDataManager = gameObjectWithTag.GetComponent<AiDataManager>();
     }
 }
