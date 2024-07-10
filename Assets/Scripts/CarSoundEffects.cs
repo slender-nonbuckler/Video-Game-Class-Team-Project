@@ -24,8 +24,8 @@ public class CarSoundEffects : MonoBehaviour
     void Update()
     {
         carSpeed = car.velocity.magnitude * 4.0f / 100;
-        print("cur speed: " + carSpeed);
-        print("previous speed: " + previousCarSpeed);
+        // print("cur speed: " + carSpeed);
+        // print("previous speed: " + previousCarSpeed);
 
         engineAudioSource.pitch = carSpeed * 3;
         if (carSpeed * 3 < 1.0)
