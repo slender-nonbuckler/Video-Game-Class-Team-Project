@@ -295,4 +295,23 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
             SceneManager.LoadScene("Track1v2");
         }
     }
+
+    public void AddMoney()
+    {
+        if (gameData != null)
+        {
+            gameData.SetMoney(gameData.getMoney + 50);
+            UpdatePlayerMoneyDisplay();
+
+            if (DataPersistentManager.instance != null)
+            {
+                DataPersistentManager.instance.SaveGame();
+            }
+            Debug.Log($"Added 50 dollars. New total: ${gameData.getMoney}. Buy something nice :)");
+        }
+        else
+        {
+            //Debug.LogError("GameData is null in AddMoney");
+        }
+    }
 }
