@@ -24,6 +24,19 @@ public class PowerupManager : MonoBehaviour
     public TextMeshProUGUI powerupText;
 
 
+    public CinemachineVirtualCamera virtualCamera;
+    public float defaultFOV = 60f;
+    public Vector3 defaultFollowOffset = new Vector3(0f, 5f, -10f);
+
+
+    private Coroutine activePowerupCoroutine;
+
+    private void OnEnable()
+    {
+        ResetManager();
+    }
+
+
     private void Awake()
     {
         if (Instance == null)
@@ -31,6 +44,7 @@ public class PowerupManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             InitializePowerups();
+            ResetManager();
         }
         else
         {
@@ -38,29 +52,49 @@ public class PowerupManager : MonoBehaviour
         }
     }
 
+    private void ResetManager()
+    {
+        if (activePowerupCoroutine != null)
+        {
+            StopCoroutine(activePowerupCoroutine);
+            activePowerupCoroutine = null;
+        }
+
+        // Reset camera to default values
+        if (virtualCamera != null)
+        {
+            virtualCamera.m_Lens.FieldOfView = defaultFOV;
+            var transposer = virtualCamera.GetCinemachineComponent<CinemachineTransposer>();
+            if (transposer != null)
+            {
+                transposer.m_FollowOffset = defaultFollowOffset;
+            }
+        }
+    }
+
     // This is where you can define more powerups
     private void InitializePowerups()
     {
         // Speed Boost
-/*        availablePowerups.Add(new PowerupInfo
-        {
-            name = "Speed Boost",
-            duration = 5f,
-            applyEffect = (car) =>
-            {
-                float boostedSpeed = car.TopSpeed * 1.5f;
-                powerupText.text = "Speed boost applied!";
-                Debug.Log($"PowerupManager: Applying speed boost. Current speed: {car.TopSpeed}, Boosted speed: {boostedSpeed}");
-                car.SetTemporaryTopSpeed(boostedSpeed);
-            },
-            removeEffect = (car) =>
-            {
-                Debug.Log($"PowerupManager: Removing speed boost. Current speed before reset: {car.TopSpeed}");
-                car.ResetTopSpeed();
-                powerupText.text = "";
-                Debug.Log($"PowerupManager: Speed after reset: {car.TopSpeed}");
-            }
-        });*/
+        /*        availablePowerups.Add(new PowerupInfo
+                {
+                    name = "Speed Boost",
+                    duration = 5f,
+                    applyEffect = (car) =>
+                    {
+                        float boostedSpeed = car.TopSpeed * 1.5f;
+                        powerupText.text = "Speed boost applied!";
+                        Debug.Log($"PowerupManager: Applying speed boost. Current speed: {car.TopSpeed}, Boosted speed: {boostedSpeed}");
+                        car.SetTemporaryTopSpeed(boostedSpeed);
+                    },
+                    removeEffect = (car) =>
+                    {
+                        Debug.Log($"PowerupManager: Removing speed boost. Current speed before reset: {car.TopSpeed}");
+                        car.ResetTopSpeed();
+                        powerupText.text = "";
+                        Debug.Log($"PowerupManager: Speed after reset: {car.TopSpeed}");
+                    }
+                });*/
 
         // Size Increase
         availablePowerups.Add(new PowerupInfo
@@ -69,11 +103,12 @@ public class PowerupManager : MonoBehaviour
             duration = 7f,
             applyEffect = (car) =>
             {
-                StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 2f, 0.5f));
+                StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 2f, true));
             },
             removeEffect = (car) =>
             {
-                StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 0.5f, 0.5f));
+                StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
+                StartCoroutine(ResetCameraEffect(car));
             }
         });
 
@@ -84,13 +119,15 @@ public class PowerupManager : MonoBehaviour
             duration = 7f,
             applyEffect = (car) =>
             {
-                StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 0.5f, 0.5f));
+                StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 0.5f, false));
             },
             removeEffect = (car) =>
             {
-                StartCoroutine(SmoothScale(car.transform, car.transform.localScale * 2f, 0.5f));
+                StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
+                StartCoroutine(ResetCameraEffect(car));
             }
         });
+
 
         availablePowerups.Add(new PowerupInfo
         {
@@ -103,9 +140,35 @@ public class PowerupManager : MonoBehaviour
             },
             removeEffect = (car) =>
             {
-
             }
         });
+    }
+    private IEnumerator CameraUpdate(float targetFOV, Vector3 targetOffset, float duration)
+    {
+        if (virtualCamera != null)
+        {
+            float startFOV = virtualCamera.m_Lens.FieldOfView;
+            var transposer = virtualCamera.GetCinemachineComponent<CinemachineTransposer>();
+            if (transposer != null)
+            {
+                Vector3 startOffset = transposer.m_FollowOffset;
+
+                float elapsedTime = 0f;
+                while (elapsedTime < duration)
+                {
+                    elapsedTime += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsedTime / duration);
+
+                    virtualCamera.m_Lens.FieldOfView = Mathf.Lerp(startFOV, targetFOV, t);
+                    transposer.m_FollowOffset = Vector3.Lerp(startOffset, targetOffset, t);
+
+                    yield return null;
+                }
+
+                virtualCamera.m_Lens.FieldOfView = targetFOV;
+                transposer.m_FollowOffset = targetOffset;
+            }
+        }
     }
 
     public PowerupInfo GetRandomPowerup(CarController car)
@@ -234,4 +297,57 @@ public class PowerupManager : MonoBehaviour
         }
         return null;
     }
+
+
+    private IEnumerator ApplyPowerupEffect(CarController car, Vector3 targetScale, bool isIncreasing)
+    {
+        yield return StartCoroutine(SmoothScale(car.transform, targetScale, 0.5f));
+
+        // Player car only for camera updates, otherwise running into other cars would adjust the camera
+        if (car.gameObject.CompareTag("Player"))
+        {
+            float targetFOV;
+            Vector3 targetOffset;
+
+            if (isIncreasing)
+            {
+                targetFOV = 90f;
+                targetOffset = new Vector3(defaultFollowOffset.x, 8f, defaultFollowOffset.z * 1.5f);
+            }
+            else
+            {
+                targetFOV = 30f;
+                targetOffset = new Vector3(defaultFollowOffset.x, 3f, defaultFollowOffset.z * 0.5f);
+            }
+
+            yield return StartCoroutine(CameraUpdate(targetFOV, targetOffset, 0.5f));
+        }
+    }
+
+    public void ApplyPowerup(PowerupInfo powerup, CarController car)
+    {
+        if (activePowerupCoroutine != null)
+        {
+            StopCoroutine(activePowerupCoroutine);
+        }
+        activePowerupCoroutine = StartCoroutine(PowerupSequence(powerup, car));
+    }
+
+    private IEnumerator PowerupSequence(PowerupInfo powerup, CarController car)
+    {
+        powerup.applyEffect(car);
+        yield return new WaitForSeconds(powerup.duration);
+        powerup.removeEffect(car);
+
+        activePowerupCoroutine = null;
+    }
+
+    private IEnumerator ResetCameraEffect(CarController car)
+    {
+        if (car.gameObject.CompareTag("Player"))
+        {
+            yield return StartCoroutine(CameraUpdate(defaultFOV, defaultFollowOffset, 0.5f));
+        }
+    }
+
 }
