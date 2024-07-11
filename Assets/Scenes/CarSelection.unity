@@ -191,6 +191,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2343611650181911814, guid: 062227023b30145aa8bb5a127e744f5f, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7121392570897361863, guid: 062227023b30145aa8bb5a127e744f5f, type: 3}
       propertyPath: m_RootOrder
       value: 9
@@ -735,6 +739,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4870101749901750040, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 48c93ef35827f740d95f941624b30ba9, type: 3}
 --- !u!1001 &1240666861
@@ -744,6 +752,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2925309103391472470, guid: 061bb0e173b9b0008b661b15ae7a7d8e, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7695142745461179799, guid: 061bb0e173b9b0008b661b15ae7a7d8e, type: 3}
       propertyPath: m_RootOrder
       value: 8
@@ -1135,6 +1147,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 712101764868683283, guid: f1dab5d6f252e4fe8a299dc96992ad91, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5454860147783567570, guid: f1dab5d6f252e4fe8a299dc96992ad91, type: 3}
       propertyPath: m_RootOrder
       value: 10
@@ -1378,6 +1394,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5177075939031498077, guid: fd25fba53007bc4f5b24152d53e0ab08, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fd25fba53007bc4f5b24152d53e0ab08, type: 3}
 --- !u!1 &1776876266 stripped
@@ -1392,6 +1412,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2068863079721412586, guid: c3e7b39138851aae0b115dd84d4979fc, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6837729417784531232, guid: c3e7b39138851aae0b115dd84d4979fc, type: 3}
       propertyPath: m_Name
       value: FireTruck
