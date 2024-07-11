@@ -47,12 +47,18 @@ public class TutorialMenu : MonoBehaviour, IDataPersistence
         Application.Quit();
     }
 
+    public void SkipTutorial()
+    {
+        SaveAndExit();
+        SceneManager.LoadScene("Track1v2");
+    }
+
     public void FinishTutorial()
     {
         PlayerPrefs.SetInt("TutorialCompleted", 1);
         PlayerPrefs.Save();
         SaveAndExit();
-        SceneManager.LoadScene("Track1v2"); // Update this later when race scene exists
+        SceneManager.LoadScene("Track1v2"); 
     }
 
     private void SaveAndExit()
