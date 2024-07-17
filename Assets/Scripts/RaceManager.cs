@@ -119,6 +119,7 @@ public class RaceManager : MonoBehaviour {
         
         UpdateCountdown();
         UpdateRacerProgress();
+        OutOfBoundsReset();
         UpdateIsRaceFinished();
     }
 
@@ -180,6 +181,49 @@ public class RaceManager : MonoBehaviour {
         for (int i = 0; i < progresses.Count; i++)
         {
             progresses[i].racePosition = i + 1;
+        }
+    }
+
+    private void OutOfBoundsReset()
+    {
+        foreach(CarController racer in racers)
+        {
+            if (isPlayer(racer))
+            {
+
+                RaceProgress progress = progressByCar[racer];
+                int previousCheckpoint = progress.previousCheckpointId;
+                previousCheckpoint = 8;
+
+                if (racer.transform.position.y <= -10f)
+                {
+
+                    Rigidbody playerRb = racer.GetComponent<Rigidbody>();
+                    if (playerRb != null)
+                    {
+                        playerRb.velocity = Vector3.zero;
+                    }
+
+                    if (previousCheckpoint < 0)
+                    {
+                        racer.transform.position = startPositions[0].transform.position;
+                        racer.transform.rotation = startPositions[0].transform.rotation;
+                    }
+                    else
+                    {
+                        racer.transform.position = checkpoints[previousCheckpoint].transform.position + new Vector3(0, 8f, 0);
+                        racer.transform.rotation = checkpoints[previousCheckpoint].transform.rotation;
+                        if (previousCheckpoint == 2 || previousCheckpoint == 3 || previousCheckpoint == 7 || previousCheckpoint == 8)
+                        {
+                            racer.transform.Rotate(0f, 180f, 0f);
+                            if (previousCheckpoint == 7)
+                            {
+                                racer.transform.position = racer.transform.position + new Vector3(0, 0, -1.5f);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

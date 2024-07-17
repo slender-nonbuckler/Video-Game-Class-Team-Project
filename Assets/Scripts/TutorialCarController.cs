@@ -89,5 +89,19 @@ public class TutorialCarController : MonoBehaviour
             Debug.Log("virtualCamera was null");
         }
     }
-    
+
+    private void Update()
+    {
+        if(selectedCar.transform.position.y <= -10f)
+        {
+            selectedCar.transform.rotation = carPrefabs[0].transform.rotation;
+            Rigidbody carBody = selectedCar.GetComponent<Rigidbody>();
+            if(carBody != null)
+            {
+                carBody.velocity = new Vector3(0, 0, 0);
+            }
+            selectedCar.transform.position = new Vector3(-0.41f, 20f, -5f);
+        }
+    }
+
 }
