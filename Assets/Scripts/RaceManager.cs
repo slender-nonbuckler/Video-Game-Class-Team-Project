@@ -193,7 +193,6 @@ public class RaceManager : MonoBehaviour {
 
                 RaceProgress progress = progressByCar[racer];
                 int previousCheckpoint = progress.previousCheckpointId;
-                previousCheckpoint = 8;
 
                 if (racer.transform.position.y <= -10f)
                 {
