@@ -23,7 +23,7 @@ public class HUDManager : MonoBehaviour
 
     private void UpdateHUD()
     {
-        if (!playerRaceId || !FindPlayerRaceId()) {
+        if (!playerRaceId && !FindPlayerRaceId()) {
             return;
         }
         
@@ -31,7 +31,7 @@ public class HUDManager : MonoBehaviour
         int lapsNeededToFinish = raceManager.GetLapsNeededToFinish();
 
         // Find the player's car and update the HUD
-        if (carProgress.TryGetValue(playerRaceId, out var playerProgress))
+        if (carProgress.TryGetValue(playerRaceId.id, out var playerProgress))
         {
             playerPositionText.text = $"Position: {playerProgress.racePosition}";
             lapInfoText.text = $"Lap {playerProgress.lapsCompleted} / {lapsNeededToFinish}";

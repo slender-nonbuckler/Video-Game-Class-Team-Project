@@ -44,7 +44,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
 
     public bool isRaceFinished { get; private set; } = false;
-    private Dictionary<RaceId, RaceProgress> progressByCar = new Dictionary<RaceId, RaceProgress>();
+    private Dictionary<int, RaceProgress> progressByCar = new Dictionary<int, RaceProgress>();
 
     public RacePlayerCarSpawn playerCarSpawnManager;
 
@@ -69,7 +69,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
         foreach (var entry in progressByCar)
         {
-            RaceId raceId = entry.Key;
+            int raceId = entry.Key;
             RaceProgress progress = entry.Value;
 
             RaceResult result = new RaceResult();
@@ -97,7 +97,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
             RaceId raceId = racer.AddComponent<RaceId>();
             racers.Add(raceId);
-            progressByCar[raceId] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
+            progressByCar[raceId.id] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
         }
 
         DisableDrivers();
@@ -190,7 +190,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     {
         foreach (RaceId racer in racers)
         {
-            RaceProgress progress = progressByCar[racer];
+            RaceProgress progress = progressByCar[racer.id];
             if (progress == null)
             {
                 continue;
@@ -221,7 +221,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
      * for HUDManager, because progressByCar and lapsneededtofinish are set to
      * be private in this class.
      */
-    public Dictionary<RaceId, RaceProgress> GetProgressByCar()
+    public Dictionary<int, RaceProgress> GetProgressByCar()
     {
         return progressByCar;
     }
@@ -262,14 +262,14 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     private void HandlePassCheckpoint(object sender, RaceId raceId)
     {
-        if (progressByCar.ContainsKey(raceId) == false)
+        if (progressByCar.ContainsKey(raceId.id) == false)
         {
             Debug.Log("Non racing car passed checkpoint.");
             return;
         }
 
         Checkpoint checkpoint = (Checkpoint)sender;
-        RaceProgress raceProgress = progressByCar[raceId];
+        RaceProgress raceProgress = progressByCar[raceId.id];
 
         if (checkpoint.id != raceProgress.nextCheckpointId)
         {
@@ -433,7 +433,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     public class RaceResult : IComparable<RaceResult>
     {
-        public RaceId raceId;
+        public int raceId;
         public int position;
         public float time;
 
@@ -453,7 +453,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
         if (playerRaceId != null)
         {
-            playerPlacement = results.FindIndex(result => result.raceId == playerRaceId) + 1;
+            playerPlacement = results.FindIndex(result => result.raceId == playerRaceId.id) + 1;
             moneyEarnedThisRace = CalculateReward(playerRaceId, results);
             AddMoneyToPlayer(moneyEarnedThisRace);
         }
@@ -471,12 +471,18 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     private RaceId FindPlayerRaceId(List<RaceResult> results)
     {
-        return results.Find(result => isPlayer(result.raceId))?.raceId;
+        foreach (RaceId raceId in racers) {
+            if (raceId.gameObject.CompareTag("Player")) {
+                return raceId;
+            }
+        }
+
+        return null;
     }
 
     private int CalculateReward(RaceId playerRaceId, List<RaceResult> results)
     {
-        int playerPosition = results.FindIndex(result => result.raceId == playerRaceId) + 1;
+        int playerPosition = results.FindIndex(result => result.raceId == playerRaceId.id) + 1;
 
         switch (playerPosition)
         {
