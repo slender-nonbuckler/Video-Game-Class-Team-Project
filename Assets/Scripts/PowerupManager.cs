@@ -194,7 +194,7 @@ public class PowerupManager : MonoBehaviour
 
         // Randomly select a different car prefab
         GameObject newCarPrefab = GetRandomDifferentCarPrefab(currentCarPrefabName);
-        if (newCarPrefab == null)
+        if (!newCarPrefab)
         {
             yield break;
         }
@@ -259,14 +259,14 @@ public class PowerupManager : MonoBehaviour
         CarController carController = car.GetComponent<CarController>();
         playerDriver.SetCarController(carController);
 
-        if (car.GetComponent<AiDriver>() != null)
+        if (car.GetComponent<AiDriver>())
         {
             car.GetComponent<AiDriver>().enabled = false;
         }
 
         // Update camera
-        Cinemachine.CinemachineVirtualCamera virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
-        if (virtualCamera != null)
+        CinemachineVirtualCamera virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        if (virtualCamera)
         {
             virtualCamera.Follow = car.transform;
             virtualCamera.LookAt = car.transform;
