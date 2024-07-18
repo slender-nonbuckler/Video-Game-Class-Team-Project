@@ -14,6 +14,8 @@ using UnityEngine.Serialization;
  * - Keeping track of individual racer progress
  * - Knowing when the race is over
  * - Providing info on race events like overtakes, or last laps.
+ * - Calculating money and rewarding money to player at the end of the round.
+ * - Switching player from 
  */
 public class RaceManager : MonoBehaviour, IDataPersistence
 {
@@ -258,6 +260,8 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         isRaceFinished = true;
         Debug.Log("OnRaceFinish");
         OnRaceFinish?.Invoke();
+
+        SwitchPlayerToAI();
     }
 
     private void HandlePassCheckpoint(object sender, CarController carController)
@@ -503,5 +507,24 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         data.Money += moneyEarnedThisSession;
         Debug.Log($"Saving race earnings: {moneyEarnedThisSession}. New total money: {data.Money}");
         moneyEarnedThisSession = 0;
+    }
+
+    // turn player driver into ai driver
+
+    private void SwitchPlayerToAI()
+    {
+        CarController playerCar = FindPlayerCar(GetResults());
+        if (playerCar != null)
+        {
+            PlayerDriver playerDriver = playerCar.GetComponent<PlayerDriver>();
+            AiDriver aiDriver = playerCar.GetComponent<AiDriver>();
+
+            if (playerDriver != null && aiDriver != null)
+            {
+                playerDriver.enabled = false;
+                aiDriver.enabled = true;
+
+            }
+        }
     }
 }
