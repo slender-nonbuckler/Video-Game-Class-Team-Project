@@ -36,6 +36,9 @@ public class RaceManager : MonoBehaviour {
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
+
+    //Field to adjust out of bounds height
+    [SerializeField] private float OutOfBoundsHeight = -10f;
    
 
     public bool isRaceFinished { get; private set; } = false;
@@ -193,7 +196,7 @@ public class RaceManager : MonoBehaviour {
             RaceProgress progress = progressByCar[racer];
             int previousCheckpoint = progress.previousCheckpointId;
 
-            if (racer.transform.position.y > -10f) {
+            if (racer.transform.position.y > OutOfBoundsHeight) {
                 continue;
             }
 

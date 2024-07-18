@@ -7,6 +7,9 @@ public class TutorialCarController : MonoBehaviour
     public List<GameObject> carPrefabs;
     private GameObject selectedCar;
     public CinemachineVirtualCamera virtualCamera;
+
+    [SerializeField] private float OutOfBoundsHeight = -10f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -92,7 +95,7 @@ public class TutorialCarController : MonoBehaviour
 
     private void Update()
     {
-        if(selectedCar.transform.position.y <= -10f)
+        if(selectedCar.transform.position.y <= OutOfBoundsHeight)
         {
             selectedCar.transform.rotation = carPrefabs[0].transform.rotation;
             Rigidbody carBody = selectedCar.GetComponent<Rigidbody>();
