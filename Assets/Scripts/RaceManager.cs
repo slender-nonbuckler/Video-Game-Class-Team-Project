@@ -30,7 +30,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     private List<Transform> startPositions;
 
     [SerializeField] private List<Checkpoint> checkpoints;
-    [SerializeField] private List<CarController> racers;
+    [SerializeField] private List<RaceId> racers;
     [SerializeField] private List<GameObject> testRacerGos;
 
     [Header("Parameters")]
@@ -44,7 +44,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
 
     public bool isRaceFinished { get; private set; } = false;
-    private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
+    private Dictionary<RaceId, RaceProgress> progressByCar = new Dictionary<RaceId, RaceProgress>();
 
     public RacePlayerCarSpawn playerCarSpawnManager;
 
@@ -69,11 +69,11 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
         foreach (var entry in progressByCar)
         {
-            CarController car = entry.Key;
+            RaceId raceId = entry.Key;
             RaceProgress progress = entry.Value;
 
             RaceResult result = new RaceResult();
-            result.car = car;
+            result.raceId = raceId;
             result.position = progress.racePosition;
             result.time = progress.time;
 
@@ -82,11 +82,6 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
         results.Sort();
         return results;
-    }
-
-    public RaceProgress GetRaceProgressFor(CarController carController)
-    {
-        return progressByCar[carController];
     }
 
     public void PositionRacers(List<GameObject> racerGameObjects)
@@ -100,15 +95,17 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             racer.transform.position = startPosition.position;
             racer.transform.rotation = startPosition.rotation;
 
-            CarController carController = racer.GetComponent<CarController>();
-            if (carController)
-            {
-                racers.Add(carController);
-                progressByCar[carController] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
-            }
+            RaceId raceId = racer.AddComponent<RaceId>();
+            racers.Add(raceId);
+            progressByCar[raceId] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
         }
 
         DisableDrivers();
+
+        for (int i = placementCount; i < racerGameObjects.Count; i++) {
+            GameObject extraRacer = racerGameObjects[i];
+            Destroy(extraRacer);
+        }
     }
 
     public void StartRaceCountdown()
@@ -136,7 +133,6 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         testRacerGos.Insert(0, playerCarSpawnManager.selectedCar);
         PositionRacers(testRacerGos);
         StartRaceCountdown();
-
 
         OnRaceFinish.AddListener(RewardPlayerMoney);
     }
@@ -192,7 +188,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     private void UpdateRacerProgress()
     {
-        foreach (CarController racer in racers)
+        foreach (RaceId racer in racers)
         {
             RaceProgress progress = progressByCar[racer];
             if (progress == null)
@@ -225,7 +221,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
      * for HUDManager, because progressByCar and lapsneededtofinish are set to
      * be private in this class.
      */
-    public Dictionary<CarController, RaceProgress> GetProgressByCar()
+    public Dictionary<RaceId, RaceProgress> GetProgressByCar()
     {
         return progressByCar;
     }
@@ -264,16 +260,16 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         SwitchPlayerToAI();
     }
 
-    private void HandlePassCheckpoint(object sender, CarController carController)
+    private void HandlePassCheckpoint(object sender, RaceId raceId)
     {
-        if (progressByCar.ContainsKey(carController) == false)
+        if (progressByCar.ContainsKey(raceId) == false)
         {
             Debug.Log("Non racing car passed checkpoint.");
             return;
         }
 
         Checkpoint checkpoint = (Checkpoint)sender;
-        RaceProgress raceProgress = progressByCar[carController];
+        RaceProgress raceProgress = progressByCar[raceId];
 
         if (checkpoint.id != raceProgress.nextCheckpointId)
         {
@@ -282,7 +278,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         }
 
         raceProgress.checkpointsCompleted++;
-        Debug.Log($"{carController} passed checkpoint {checkpoint.id}");
+        Debug.Log($"{raceId} passed checkpoint {checkpoint.id}");
 
         if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue)
         {
@@ -296,7 +292,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             Debug.Log("OnRaceFirstRacerFinish");
             OnRaceFirstRacerFinish?.Invoke();
 
-            if (isPlayer(carController))
+            if (isPlayer(raceId))
             {
                 Debug.Log("OnPlayerFinish");
                 OnPlayerFinish?.Invoke();
@@ -311,7 +307,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     private void EnableDrivers()
     {
-        foreach (CarController racer in racers)
+        foreach (RaceId racer in racers)
         {
             PlayerDriver playerDriver = racer.GetComponent<PlayerDriver>();
             AiDriver aiDriver = racer.GetComponent<AiDriver>();
@@ -331,7 +327,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     private void DisableDrivers()
     {
-        foreach (CarController racer in racers)
+        foreach (RaceId racer in racers)
         {
             PlayerDriver playerDriver = racer.GetComponent<PlayerDriver>();
             AiDriver aiDriver = racer.GetComponent<AiDriver>();
@@ -348,9 +344,9 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private bool isPlayer(CarController carController)
+    private bool isPlayer(RaceId raceId)
     {
-        return carController.GetComponent<PlayerDriver>() != null;
+        return raceId.GetComponent<PlayerDriver>();
     }
 
     public class RaceProgress : IComparable<RaceProgress>
@@ -437,7 +433,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     public class RaceResult : IComparable<RaceResult>
     {
-        public CarController car;
+        public RaceId raceId;
         public int position;
         public float time;
 
@@ -453,12 +449,12 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     private void RewardPlayerMoney()
     {
         List<RaceResult> results = GetResults();
-        CarController playerCar = FindPlayerCar(results);
+        RaceId playerRaceId = FindPlayerRaceId(results);
 
-        if (playerCar != null)
+        if (playerRaceId != null)
         {
-            playerPlacement = results.FindIndex(result => result.car == playerCar) + 1;
-            moneyEarnedThisRace = CalculateReward(playerCar, results);
+            playerPlacement = results.FindIndex(result => result.raceId == playerRaceId) + 1;
+            moneyEarnedThisRace = CalculateReward(playerRaceId, results);
             AddMoneyToPlayer(moneyEarnedThisRace);
         }
     }
@@ -473,14 +469,14 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         return moneyEarnedThisRace;
     }
 
-    private CarController FindPlayerCar(List<RaceResult> results)
+    private RaceId FindPlayerRaceId(List<RaceResult> results)
     {
-        return results.Find(result => isPlayer(result.car))?.car;
+        return results.Find(result => isPlayer(result.raceId))?.raceId;
     }
 
-    private int CalculateReward(CarController playerCar, List<RaceResult> results)
+    private int CalculateReward(RaceId playerRaceId, List<RaceResult> results)
     {
-        int playerPosition = results.FindIndex(result => result.car == playerCar) + 1;
+        int playerPosition = results.FindIndex(result => result.raceId == playerRaceId) + 1;
 
         switch (playerPosition)
         {
@@ -513,18 +509,18 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     private void SwitchPlayerToAI()
     {
-        CarController playerCar = FindPlayerCar(GetResults());
-        if (playerCar != null)
+        RaceId playerRaceId = FindPlayerRaceId(GetResults());
+        if (!playerRaceId) {
+            return;
+        }
+        
+        PlayerDriver playerDriver = playerRaceId.GetComponent<PlayerDriver>(); 
+        AiDriver aiDriver = playerRaceId.GetComponent<AiDriver>();
+
+        if (playerDriver && aiDriver) 
         {
-            PlayerDriver playerDriver = playerCar.GetComponent<PlayerDriver>();
-            AiDriver aiDriver = playerCar.GetComponent<AiDriver>();
-
-            if (playerDriver != null && aiDriver != null)
-            {
-                playerDriver.enabled = false;
-                aiDriver.enabled = true;
-
-            }
+            playerDriver.enabled = false; 
+            aiDriver.enabled = true;
         }
     }
 }
