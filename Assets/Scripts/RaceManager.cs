@@ -14,28 +14,36 @@ using UnityEngine.Serialization;
  * - Keeping track of individual racer progress
  * - Knowing when the race is over
  * - Providing info on race events like overtakes, or last laps.
+ * - Calculating money and rewarding money to player at the end of the round.
+ * - Switching player from 
  */
-public class RaceManager : MonoBehaviour {
+public class RaceManager : MonoBehaviour, IDataPersistence
+{
     public UnityEvent OnRaceCountdown;
     public UnityEvent OnDrivingStart;
     public UnityEvent OnRaceFirstRacerFinish;
     public UnityEvent OnPlayerFinish;
-    public UnityEvent OnRaceFinish; 
+    public UnityEvent OnRaceFinish;
 
-    [Header("References")] [SerializeField]
+    [Header("References")]
+    [SerializeField]
     private List<Transform> startPositions;
 
     [SerializeField] private List<Checkpoint> checkpoints;
     [SerializeField] private List<CarController> racers;
     [SerializeField] private List<GameObject> testRacerGos;
 
-    [Header("Parameters")] [SerializeField]
+    [Header("Parameters")]
+    [SerializeField]
     private float countdownLength = 3f;
 
     [SerializeField] private int lapsNeededToFinish = 1;
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
+
+    //Field to adjust out of bounds height
+    [SerializeField] private float OutOfBoundsHeight = -10f;
    
 
     public bool isRaceFinished { get; private set; } = false;
@@ -43,14 +51,27 @@ public class RaceManager : MonoBehaviour {
 
     public RacePlayerCarSpawn playerCarSpawnManager;
 
-    public List<Transform> GetStartPositions() {
+
+    [Header("Reward System")]
+    [SerializeField] private int firstPlaceReward = 50;
+    [SerializeField] private int secondPlaceReward = 25;
+    [SerializeField] private int thirdPlaceReward = 15;
+    [SerializeField] private int participationReward = 10;
+    private int playerPlacement;
+    private int moneyEarnedThisRace;
+
+    private int moneyEarnedThisSession = 0;
+    public List<Transform> GetStartPositions()
+    {
         return startPositions;
     }
 
-    public List<RaceResult> GetResults() {
+    public List<RaceResult> GetResults()
+    {
         List<RaceResult> results = new List<RaceResult>();
-        
-        foreach (var entry in progressByCar) {
+
+        foreach (var entry in progressByCar)
+        {
             CarController car = entry.Key;
             RaceProgress progress = entry.Value;
 
@@ -58,21 +79,24 @@ public class RaceManager : MonoBehaviour {
             result.car = car;
             result.position = progress.racePosition;
             result.time = progress.time;
-            
+
             results.Add(result);
         }
-        
+
         results.Sort();
         return results;
     }
 
-    public RaceProgress GetRaceProgressFor(CarController carController) {
+    public RaceProgress GetRaceProgressFor(CarController carController)
+    {
         return progressByCar[carController];
     }
 
-    public void PositionRacers(List<GameObject> racerGameObjects) {
+    public void PositionRacers(List<GameObject> racerGameObjects)
+    {
         int placementCount = Math.Min(startPositions.Count, racerGameObjects.Count);
-        for (int i = 0; i < placementCount; i++) {
+        for (int i = 0; i < placementCount; i++)
+        {
             GameObject racer = racerGameObjects[i];
             Transform startPosition = startPositions[i];
 
@@ -80,7 +104,8 @@ public class RaceManager : MonoBehaviour {
             racer.transform.rotation = startPosition.rotation;
 
             CarController carController = racer.GetComponent<CarController>();
-            if (carController) {
+            if (carController)
+            {
                 racers.Add(carController);
                 progressByCar[carController] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
             }
@@ -89,8 +114,10 @@ public class RaceManager : MonoBehaviour {
         DisableDrivers();
     }
 
-    public void StartRaceCountdown() {
-        if (isCountdownStarted) {
+    public void StartRaceCountdown()
+    {
+        if (isCountdownStarted)
+        {
             return;
         }
 
@@ -101,8 +128,10 @@ public class RaceManager : MonoBehaviour {
     }
 
 
-    private void Start() {
-        for (int i = 0; i < checkpoints.Count; i++) {
+    private void Start()
+    {
+        for (int i = 0; i < checkpoints.Count; i++)
+        {
             checkpoints[i].id = i;
             checkpoints[i].OnPassCheckpoint += HandlePassCheckpoint;
         }
@@ -110,41 +139,53 @@ public class RaceManager : MonoBehaviour {
         testRacerGos.Insert(0, playerCarSpawnManager.selectedCar);
         PositionRacers(testRacerGos);
         StartRaceCountdown();
+
+
+        OnRaceFinish.AddListener(RewardPlayerMoney);
     }
 
-    private void Update() {
-        if (isRaceFinished) {
+    private void Update()
+    {
+        if (isRaceFinished)
+        {
             return;
         }
-        
+
         UpdateCountdown();
         UpdateRacerProgress();
+        OutOfBoundsReset();
         UpdateIsRaceFinished();
     }
 
-    private void OnDrawGizmosSelected() {
+    private void OnDrawGizmosSelected()
+    {
         Color startPositionColor = Color.green;
         startPositionColor.a = 0.2f;
 
         Gizmos.color = startPositionColor;
-        foreach (Transform startPosition in startPositions) {
+        foreach (Transform startPosition in startPositions)
+        {
             Gizmos.matrix = startPosition.transform.localToWorldMatrix;
             Gizmos.DrawCube(Vector3.one, new Vector3(3f, 0.5f, 5f));
         }
     }
 
-    private void UpdateCountdown() {
-        if (isCountdownStarted == false || isCountdownFinished) {
+    private void UpdateCountdown()
+    {
+        if (isCountdownStarted == false || isCountdownFinished)
+        {
             return;
         }
 
         countdownTimer -= Time.deltaTime;
 
-        if (countdownTimer < 0f) {
+        if (countdownTimer < 0f)
+        {
             isCountdownFinished = true;
             EnableDrivers();
 
-            foreach (RaceProgress progress in progressByCar.Values) {
+            foreach (RaceProgress progress in progressByCar.Values)
+            {
                 progress.StartRace();
             }
 
@@ -183,6 +224,49 @@ public class RaceManager : MonoBehaviour {
         }
     }
 
+    private void OutOfBoundsReset() {
+        foreach (CarController racer in racers) {
+            if (!isPlayer(racer)) {
+                continue;
+            }
+
+            RaceProgress progress = progressByCar[racer];
+            int previousCheckpoint = progress.previousCheckpointId;
+
+            if (racer.transform.position.y > OutOfBoundsHeight) {
+                continue;
+            }
+
+            Rigidbody playerRb = racer.GetComponent<Rigidbody>();
+            if (playerRb) {
+                playerRb.velocity = Vector3.zero;
+            }
+
+            if (previousCheckpoint < 0) {
+                racer.transform.position = startPositions[0].transform.position;
+                racer.transform.rotation = startPositions[0].transform.rotation;
+            }
+            else {
+                racer.transform.position =
+                    checkpoints[previousCheckpoint].transform.position + new Vector3(0, 8f, 0);
+                racer.transform.rotation = checkpoints[previousCheckpoint].transform.rotation;
+                
+                if (
+                    previousCheckpoint == 2
+                    || previousCheckpoint == 3
+                    || previousCheckpoint == 7
+                    || previousCheckpoint == 8
+                ) {
+                    racer.transform.Rotate(0f, 180f, 0f);
+                }
+
+                if (previousCheckpoint == 7) {
+                    racer.transform.position += new Vector3(0, 0, -1.5f);
+                }
+            }
+        }
+    }
+
     /**
      * The following method used to obtain progressByCar and lapsneededtofinish 
      * for HUDManager, because progressByCar and lapsneededtofinish are set to
@@ -200,28 +284,37 @@ public class RaceManager : MonoBehaviour {
 
 
 
-    private void UpdateIsRaceFinished() {
-        if (progressByCar.Count <= 0) {
+    private void UpdateIsRaceFinished()
+    {
+        if (progressByCar.Count <= 0)
+        {
             return;
         }
-        
-        foreach (RaceProgress progress in progressByCar.Values) {
-            if (progress.isComplete == false) {
+
+        foreach (RaceProgress progress in progressByCar.Values)
+        {
+            if (progress.isComplete == false)
+            {
                 return;
             }
         }
-        
+
         EndRace();
     }
 
-    private void EndRace() {
+    private void EndRace()
+    {
         isRaceFinished = true;
         Debug.Log("OnRaceFinish");
         OnRaceFinish?.Invoke();
+
+        SwitchPlayerToAI();
     }
 
-    private void HandlePassCheckpoint(object sender, CarController carController) {
-        if (progressByCar.ContainsKey(carController) == false) {
+    private void HandlePassCheckpoint(object sender, CarController carController)
+    {
+        if (progressByCar.ContainsKey(carController) == false)
+        {
             Debug.Log("Non racing car passed checkpoint.");
             return;
         }
@@ -229,7 +322,8 @@ public class RaceManager : MonoBehaviour {
         Checkpoint checkpoint = (Checkpoint)sender;
         RaceProgress raceProgress = progressByCar[carController];
 
-        if (checkpoint.id != raceProgress.nextCheckpointId) {
+        if (checkpoint.id != raceProgress.nextCheckpointId)
+        {
             //Debug.Log("Checkpoint visited in wrong order");
             return;
         }
@@ -237,17 +331,20 @@ public class RaceManager : MonoBehaviour {
         raceProgress.checkpointsCompleted++;
         Debug.Log($"{carController} passed checkpoint {checkpoint.id}");
 
-        if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue) {
+        if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue)
+        {
             raceProgress.lapsCompleted++;
             raceProgress.checkpointsCompleted = 0;
         }
 
-        if (raceProgress.lapsCompleted >= lapsNeededToFinish) {
+        if (raceProgress.lapsCompleted >= lapsNeededToFinish)
+        {
             raceProgress.CompleteRace();
             Debug.Log("OnRaceFirstRacerFinish");
             OnRaceFirstRacerFinish?.Invoke();
 
-            if (isPlayer(carController)) {
+            if (isPlayer(carController))
+            {
                 Debug.Log("OnPlayerFinish");
                 OnPlayerFinish?.Invoke();
                 EndRace();
@@ -259,42 +356,52 @@ public class RaceManager : MonoBehaviour {
         raceProgress.nextCheckpointId %= checkpoints.Count;
     }
 
-    private void EnableDrivers() {
-        foreach (CarController racer in racers) {
+    private void EnableDrivers()
+    {
+        foreach (CarController racer in racers)
+        {
             PlayerDriver playerDriver = racer.GetComponent<PlayerDriver>();
             AiDriver aiDriver = racer.GetComponent<AiDriver>();
 
-            if (playerDriver) {
+            if (playerDriver)
+            {
                 playerDriver.enabled = true;
                 continue;
             }
 
-            if (aiDriver) {
+            if (aiDriver)
+            {
                 aiDriver.enabled = true;
             }
         }
     }
 
-    private void DisableDrivers() {
-        foreach (CarController racer in racers) {
+    private void DisableDrivers()
+    {
+        foreach (CarController racer in racers)
+        {
             PlayerDriver playerDriver = racer.GetComponent<PlayerDriver>();
             AiDriver aiDriver = racer.GetComponent<AiDriver>();
 
-            if (playerDriver) {
+            if (playerDriver)
+            {
                 playerDriver.enabled = false;
             }
 
-            if (aiDriver) {
+            if (aiDriver)
+            {
                 aiDriver.enabled = false;
             }
         }
     }
 
-    private bool isPlayer(CarController carController) {
+    private bool isPlayer(CarController carController)
+    {
         return carController.GetComponent<PlayerDriver>() != null;
     }
 
-    public class RaceProgress: IComparable<RaceProgress> {
+    public class RaceProgress : IComparable<RaceProgress>
+    {
         public bool isComplete { get; private set; }
         public int racePosition = 0;
         public float time;
@@ -311,17 +418,20 @@ public class RaceManager : MonoBehaviour {
         private float checkpointWeight;
         private float startTime;
 
-        public RaceProgress(int totalLaps, int totalCheckpoints) {
+        public RaceProgress(int totalLaps, int totalCheckpoints)
+        {
             lapWeight = 1f / totalLaps;
             checkpointWeight = 1f / totalCheckpoints;
         }
 
-        public void CompleteRace() {
+        public void CompleteRace()
+        {
             isComplete = true;
             raceCompletionPercent = 1f;
         }
 
-        public void StartRace() {
+        public void StartRace()
+        {
             startTime = Time.time;
             time = Time.time - startTime;
         }
@@ -330,8 +440,10 @@ public class RaceManager : MonoBehaviour {
             Vector3 racerPosition,
             Vector3 prevCheckpointPosition,
             Vector3 nextCheckpointPosition
-        ) {
-            if (isComplete) {
+        )
+        {
+            if (isComplete)
+            {
                 return;
             }
 
@@ -339,12 +451,14 @@ public class RaceManager : MonoBehaviour {
             UpdateLapCompletionPercent(racerPosition, prevCheckpointPosition, nextCheckpointPosition);
             UpdateRaceCompletionPercent();
         }
-        
-        public int CompareTo(RaceProgress other) {
+
+        public int CompareTo(RaceProgress other)
+        {
             return -raceCompletionPercent.CompareTo(other.raceCompletionPercent);
         }
 
-        private void UpdateRaceCompletionPercent() {
+        private void UpdateRaceCompletionPercent()
+        {
             raceCompletionPercent = lapsCompleted * lapWeight + lapWeight * lapCompletionPercent;
         }
 
@@ -352,7 +466,8 @@ public class RaceManager : MonoBehaviour {
             Vector3 racerPosition,
             Vector3 prevCheckpointPosition,
             Vector3 nextCheckpointPosition
-        ) {
+        )
+        {
             float totalDistance = Vector3.Distance(prevCheckpointPosition, nextCheckpointPosition);
             float remainingDistance = Vector3.Distance(racerPosition, nextCheckpointPosition);
             float chekpointCompletionPercent = (1f - remainingDistance) / totalDistance;
@@ -361,18 +476,102 @@ public class RaceManager : MonoBehaviour {
                                    + (checkpointWeight * chekpointCompletionPercent);
         }
 
-        private void UpdateTime() {
+        private void UpdateTime()
+        {
             time = Time.time - startTime;
         }
     }
-    
-    public class RaceResult : IComparable<RaceResult> {
+
+    public class RaceResult : IComparable<RaceResult>
+    {
         public CarController car;
         public int position;
         public float time;
-        
-        public int CompareTo(RaceResult other) {
+
+        public int CompareTo(RaceResult other)
+        {
             return position.CompareTo(other.position);
+        }
+    }
+
+
+    // Rewarding Implementation
+
+    private void RewardPlayerMoney()
+    {
+        List<RaceResult> results = GetResults();
+        CarController playerCar = FindPlayerCar(results);
+
+        if (playerCar != null)
+        {
+            playerPlacement = results.FindIndex(result => result.car == playerCar) + 1;
+            moneyEarnedThisRace = CalculateReward(playerCar, results);
+            AddMoneyToPlayer(moneyEarnedThisRace);
+        }
+    }
+
+    public int GetPlayerPlacement()
+    {
+        return playerPlacement;
+    }
+
+    public int GetMoneyEarned()
+    {
+        return moneyEarnedThisRace;
+    }
+
+    private CarController FindPlayerCar(List<RaceResult> results)
+    {
+        return results.Find(result => isPlayer(result.car))?.car;
+    }
+
+    private int CalculateReward(CarController playerCar, List<RaceResult> results)
+    {
+        int playerPosition = results.FindIndex(result => result.car == playerCar) + 1;
+
+        switch (playerPosition)
+        {
+            case 1: return firstPlaceReward;
+            case 2: return secondPlaceReward;
+            case 3: return thirdPlaceReward;
+            default: return participationReward;
+        }
+    }
+
+    private void AddMoneyToPlayer(int amount)
+    {
+        moneyEarnedThisSession += amount;
+        Debug.Log($"Player rewarded {amount} money for race completion! Total this session: {moneyEarnedThisSession}");
+    }
+
+    public void LoadData(GameData data)
+    {
+        moneyEarnedThisSession = 0;
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        data.Money += moneyEarnedThisSession;
+        Debug.Log($"Saving race earnings: {moneyEarnedThisSession}. New total money: {data.Money}");
+        moneyEarnedThisSession = 0;
+    }
+
+    // turn player driver into ai driver
+
+    private void SwitchPlayerToAI()
+    {
+        CarController playerCar = FindPlayerCar(GetResults());
+        if (playerCar != null)
+        {
+            PlayerDriver playerDriver = playerCar.GetComponent<PlayerDriver>();
+            AiDriver aiDriver = playerCar.GetComponent<AiDriver>();
+
+            if (playerDriver != null && aiDriver != null)
+            {
+                playerDriver.enabled = false;
+                aiDriver.enabled = true;
+
+            }
         }
     }
 }
