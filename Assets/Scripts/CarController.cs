@@ -52,8 +52,8 @@ public class CarController : MonoBehaviour {
 
     private float resetCooldown = 2f;
     private float resetCooloffTime = 0f;
-    private float speedBoostAccelerationAmount = 7.5f;
-    private float speedBoostAccelerationAmountRamp = 10.0f;
+    private float speedBoostAccelerationAmount = 20.0f;
+    private float speedBoostAccelerationAmountRamp = 25.0f;
 
 
     //Getters for car selection information display
