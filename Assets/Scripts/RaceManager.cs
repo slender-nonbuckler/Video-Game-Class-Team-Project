@@ -332,8 +332,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             raceProgress.checkpointsCompleted = 0;
         }
         raceProgress.checkpointsCompleted++;
-        Debug.Log($"{carController} passed checkpoint {checkpoint.id}");
-        Debug.Log($"{carController} passed checkpoint {raceProgress.checkpointsCompleted}");
+        
         
 
         if (raceProgress.lapsCompleted >= lapsNeededToFinish)
