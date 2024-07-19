@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using TMPro;
 
 
 /**
@@ -35,7 +36,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     [Header("Parameters")]
     [SerializeField]
-    private float countdownLength = 3f;
+    private float countdownLength = 4f;
 
     [SerializeField] private int lapsNeededToFinish = 1;
     private bool isCountdownStarted = false;
@@ -50,7 +51,9 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
 
     public RacePlayerCarSpawn playerCarSpawnManager;
-
+    
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI countdownText;
 
     [Header("Reward System")]
     [SerializeField] private int firstPlaceReward = 50;
@@ -142,7 +145,14 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
 
         OnRaceFinish.AddListener(RewardPlayerMoney);
+
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(false);
+        }
     }
+
+
 
     private void Update()
     {
@@ -179,6 +189,13 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
         countdownTimer -= Time.deltaTime;
 
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(true);
+            countdownText.text = Mathf.Floor(countdownTimer).ToString(); // Display countdown as integer
+            if (countdownTimer < 1f) countdownText.text = "Go!";
+        }
+
         if (countdownTimer < 0f)
         {
             isCountdownFinished = true;
@@ -191,6 +208,11 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
             Debug.Log("OnDrivingStart");
             OnDrivingStart?.Invoke();
+
+            if (countdownText != null)
+            {
+                countdownText.gameObject.SetActive(false); // Hide the countdown text after the countdown is finished
+            }
         }
     }
 
