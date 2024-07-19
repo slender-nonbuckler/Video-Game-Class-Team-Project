@@ -20,7 +20,7 @@ public class Spacer : MonoBehaviour {
         List<RaceManager.RaceResult> raceResults = raceManager.GetResults();
         Debug.Log(raceResults.Count);
         foreach (RaceManager.RaceResult result in raceResults) {
-            Debug.Log($"{result.car}\tPosition: {result.position}\tTime: {result.time}");
+            Debug.Log($"{result.raceId}\tPosition: {result.position}\tTime: {result.time}");
         }
     }
 }

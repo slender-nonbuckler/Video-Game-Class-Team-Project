@@ -1,8 +1,5 @@
-using System.Collections;
 using UnityEngine;
 using TMPro;
-using System.Collections.Generic;
-using System.Linq;
 
 public class HUDManager : MonoBehaviour
 {
@@ -10,9 +7,11 @@ public class HUDManager : MonoBehaviour
     public TMP_Text lapInfoText;
     public RaceManager raceManager;
 
+    private RaceId playerRaceId;
+    
     private void Update()
     {
-        if (raceManager != null)
+        if (raceManager)
         {
             UpdateHUD();
         }
@@ -24,31 +23,33 @@ public class HUDManager : MonoBehaviour
 
     private void UpdateHUD()
     {
+        if (!playerRaceId && !FindPlayerRaceId()) {
+            return;
+        }
+        
         var carProgress = raceManager.GetProgressByCar();
         int lapsNeededToFinish = raceManager.GetLapsNeededToFinish();
 
         // Find the player's car and update the HUD
-        CarController playerCar = raceManager.playerCarSpawnManager.selectedCar.GetComponent<CarController>();
-        if (carProgress.TryGetValue(playerCar, out var playerProgress))
+        if (carProgress.TryGetValue(playerRaceId.id, out var playerProgress))
         {
             playerPositionText.text = $"Position: {playerProgress.racePosition}";
+            lapInfoText.text = $"Lap {playerProgress.lapsCompleted} / {lapsNeededToFinish}";
         }
-
-        // Update lap completed HUD
-        UpdateLapInfoText(carProgress, lapsNeededToFinish);
-
     }
 
-    private void UpdateLapInfoText(Dictionary<CarController, RaceManager.RaceProgress> carProgress, int lapsNeededToFinish)
-    {
-        if (carProgress.Count > 0)
-        {
-            RaceManager.RaceProgress firstProgress = carProgress.Values.First();
-
-            int currentLap = firstProgress.lapsCompleted;
-            int totalLaps = lapsNeededToFinish;
-
-            lapInfoText.text = $"Lap {currentLap} / {totalLaps}";
+    private bool FindPlayerRaceId() {
+        GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+        if (!playerGameObject) {
+            return false;
         }
+
+        RaceId raceId = playerGameObject.GetComponent<RaceId>();
+        if (!raceId) {
+            return false;
+        }
+
+        playerRaceId = raceId;
+        return true;
     }
 }
