@@ -37,7 +37,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     [SerializeField]
     private float countdownLength = 3f;
 
-    [SerializeField] private int lapsNeededToFinish = 1;
+    [SerializeField] private int lapsNeededToFinish = 2;
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
@@ -327,15 +327,15 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             //Debug.Log("Checkpoint visited in wrong order");
             return;
         }
-
-        raceProgress.checkpointsCompleted++;
-        Debug.Log($"{carController} passed checkpoint {checkpoint.id}");
-
         if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue)
         {
             raceProgress.lapsCompleted++;
             raceProgress.checkpointsCompleted = 0;
         }
+        raceProgress.checkpointsCompleted++;
+        Debug.Log($"{carController} passed checkpoint {checkpoint.id}");
+        Debug.Log($"{carController} passed checkpoint {raceProgress.checkpointsCompleted}");
+        
 
         if (raceProgress.lapsCompleted >= lapsNeededToFinish)
         {
