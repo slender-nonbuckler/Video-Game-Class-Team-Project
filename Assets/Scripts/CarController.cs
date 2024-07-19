@@ -50,8 +50,9 @@ public class CarController : MonoBehaviour {
     private float startHeight;
     private String currentGameObjectTag;
 
-    private float resetCooldown = 2f;
-    private float resetCooloffTime = 0f;
+    private float resetCooldown = 5f;
+    private float resetOnCooldownTill = 0f;
+    
     private float speedBoostAccelerationAmount = 20.0f;
     private float speedBoostAccelerationAmountRamp = 25.0f;
 
@@ -121,11 +122,11 @@ public class CarController : MonoBehaviour {
     }
 
     private void Reset() {
-        if (resetCooloffTime > Time.time) {
+        if (resetOnCooldownTill > Time.time) {
             return;
         }
 
-        resetCooloffTime = Time.time + resetCooldown;
+        resetOnCooldownTill = Time.time + resetCooldown;
         
         transform.position = new Vector3(transform.position.x, transform.position.y + 3f, transform.position.z);
         transform.rotation = Quaternion.LookRotation(transform.forward);
