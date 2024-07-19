@@ -42,6 +42,9 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
 
+    //Field to adjust out of bounds height
+    [SerializeField] private float OutOfBoundsHeight = -10f;
+   
 
     public bool isRaceFinished { get; private set; } = false;
     private Dictionary<CarController, RaceProgress> progressByCar = new Dictionary<CarController, RaceProgress>();
@@ -150,6 +153,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
         UpdateCountdown();
         UpdateRacerProgress();
+        OutOfBoundsReset();
         UpdateIsRaceFinished();
     }
 
@@ -217,6 +221,49 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         for (int i = 0; i < progresses.Count; i++)
         {
             progresses[i].racePosition = i + 1;
+        }
+    }
+
+    private void OutOfBoundsReset() {
+        foreach (CarController racer in racers) {
+            if (!isPlayer(racer)) {
+                continue;
+            }
+
+            RaceProgress progress = progressByCar[racer];
+            int previousCheckpoint = progress.previousCheckpointId;
+
+            if (racer.transform.position.y > OutOfBoundsHeight) {
+                continue;
+            }
+
+            Rigidbody playerRb = racer.GetComponent<Rigidbody>();
+            if (playerRb) {
+                playerRb.velocity = Vector3.zero;
+            }
+
+            if (previousCheckpoint < 0) {
+                racer.transform.position = startPositions[0].transform.position;
+                racer.transform.rotation = startPositions[0].transform.rotation;
+            }
+            else {
+                racer.transform.position =
+                    checkpoints[previousCheckpoint].transform.position + new Vector3(0, 8f, 0);
+                racer.transform.rotation = checkpoints[previousCheckpoint].transform.rotation;
+                
+                if (
+                    previousCheckpoint == 2
+                    || previousCheckpoint == 3
+                    || previousCheckpoint == 7
+                    || previousCheckpoint == 8
+                ) {
+                    racer.transform.Rotate(0f, 180f, 0f);
+                }
+
+                if (previousCheckpoint == 7) {
+                    racer.transform.position += new Vector3(0, 0, -1.5f);
+                }
+            }
         }
     }
 
