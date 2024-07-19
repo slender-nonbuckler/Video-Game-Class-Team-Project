@@ -421,7 +421,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         public RaceProgress(int totalLaps, int totalCheckpoints)
         {
             lapWeight = 1f / totalLaps;
-            checkpointWeight = 1f / totalCheckpoints;
+            checkpointWeight = 1f / (totalCheckpoints + 1);
         }
 
         public void CompleteRace()
