@@ -265,7 +265,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  topSpeed: 25
+  topSpeed: 35
   maxSteeringAngle: 12.5
   selfRightingStrength: 0.5
   selfRightingDamping: 0.4
@@ -333,6 +333,8 @@ MonoBehaviour:
   noiseLerpFactor: 0
   timeBetweenNoiseChanges: 0.3
   noiseWeight: 0
+  resetThreshold: 10
+  resetUtility: 0
 --- !u!114 &4696323865992549550
 MonoBehaviour:
   m_ObjectHideFlags: 0
