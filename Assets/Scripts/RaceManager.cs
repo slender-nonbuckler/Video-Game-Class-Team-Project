@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using TMPro;
 
 
 /**
@@ -50,6 +51,8 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     public RacePlayerCarSpawn playerCarSpawnManager;
 
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI countdownText;
 
     [Header("Reward System")]
     [SerializeField] private int firstPlaceReward = 50;
@@ -137,6 +140,11 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         StartRaceCountdown();
 
         OnRaceFinish.AddListener(RewardPlayerMoney);
+
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(false);
+        }
     }
 
     private void Update()
@@ -165,14 +173,14 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private void UpdateCountdown()
-    {
+    private void UpdateCountdown() {
+        countdownTimer -= Time.deltaTime;
+        UpdateCountdownText();
+        
         if (isCountdownStarted == false || isCountdownFinished)
         {
             return;
         }
-
-        countdownTimer -= Time.deltaTime;
 
         if (countdownTimer < 0f)
         {
@@ -186,6 +194,26 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
             Debug.Log("OnDrivingStart");
             OnDrivingStart?.Invoke();
+        }
+    }
+    
+    private void UpdateCountdownText() {
+        if (!countdownText || !isCountdownStarted) {
+            return;
+        }
+
+        switch (countdownTimer) {
+            case > 0:
+                countdownText.gameObject.SetActive(true);
+                countdownText.text = $"{Mathf.Floor(countdownTimer) + 1}";
+                break;
+            case > -1f:
+                countdownText.gameObject.SetActive(true);
+                countdownText.text = "Go!";
+                break;
+            default:
+                countdownText.gameObject.SetActive(false);
+                break;
         }
     }
 
