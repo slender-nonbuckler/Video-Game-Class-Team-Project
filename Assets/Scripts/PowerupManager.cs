@@ -84,7 +84,7 @@ public class PowerupManager : MonoBehaviour
 
     private void FindCamera()
     {
-        if (virtualCamera == null)
+        if (!virtualCamera)
         {
             virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
         }
@@ -92,37 +92,37 @@ public class PowerupManager : MonoBehaviour
 
     private void InitializePowerups()
     {
-        // Size Increase
-        availablePowerups.Add(new PowerupInfo
-        {
-            name = "Size Increase",
-            duration = 7f,
-            applyEffect = (car) =>
-            {
-                StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 2f, true));
-            },
-            removeEffect = (car) =>
-            {
-                StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
-                StartCoroutine(ResetCameraEffect(car));
-            }
-        });
-
-        // Size Decrease
-        availablePowerups.Add(new PowerupInfo
-        {
-            name = "Size Decrease",
-            duration = 7f,
-            applyEffect = (car) =>
-            {
-                StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 0.5f, false));
-            },
-            removeEffect = (car) =>
-            {
-                StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
-                StartCoroutine(ResetCameraEffect(car));
-            }
-        });
+        // // Size Increase
+        // availablePowerups.Add(new PowerupInfo
+        // {
+        //     name = "Size Increase",
+        //     duration = 7f,
+        //     applyEffect = (car) =>
+        //     {
+        //         StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 2f, true));
+        //     },
+        //     removeEffect = (car) =>
+        //     {
+        //         StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
+        //         StartCoroutine(ResetCameraEffect(car));
+        //     }
+        // });
+        //
+        // // Size Decrease
+        // availablePowerups.Add(new PowerupInfo
+        // {
+        //     name = "Size Decrease",
+        //     duration = 7f,
+        //     applyEffect = (car) =>
+        //     {
+        //         StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 0.5f, false));
+        //     },
+        //     removeEffect = (car) =>
+        //     {
+        //         StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
+        //         StartCoroutine(ResetCameraEffect(car));
+        //     }
+        // });
 
         // Car Switch
         availablePowerups.Add(new PowerupInfo
@@ -252,14 +252,20 @@ public class PowerupManager : MonoBehaviour
         playerDriver.SetCarController(carController);
 
         if (originalRaceId) {
-            foreach (RaceId raceId in car.GetComponents<RaceId>()) {
+            RaceId[] raceIds = car.GetComponents<RaceId>();
+            foreach (RaceId raceId in raceIds) {
                 raceId.id = originalRaceId.id;
+            }
+            
+            if (raceIds.Length <= 0) {
+                car.AddComponent<RaceId>().id = originalRaceId.id;
             }
         }
 
-        if (car.GetComponent<AiDriver>())
+        AiDriver aiDriver = car.GetComponent<AiDriver>();
+        if (aiDriver)
         {
-            car.GetComponent<AiDriver>().enabled = false;
+            aiDriver.enabled = false;
         }
 
         FindCamera();
