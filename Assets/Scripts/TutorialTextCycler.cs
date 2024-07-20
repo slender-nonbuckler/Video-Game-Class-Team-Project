@@ -38,6 +38,8 @@ public class TutorialTextCycler : MonoBehaviour
         "In the game, there are power ups and power downs",
         "When you see a spinning tire, you can try your luck!",
         "Drive into the tire on the road and see what happens",
+        "There are also traps. Run into a banana",
+        "Your car will spin!",
         "Look around for a ramp!",
         "Try driving on it and see how the car handles in the air",
         "You've reached the end of the tutorial",
