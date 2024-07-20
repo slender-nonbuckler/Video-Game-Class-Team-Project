@@ -188,10 +188,13 @@ public class PowerupManager : MonoBehaviour
         Vector3 currentVelocity = originalCar.GetComponent<Rigidbody>().velocity;
         Vector3 currentAngularVelocity = originalCar.GetComponent<Rigidbody>().angularVelocity;
 
+        RaceId originalRaceId = originalCar.GetComponent<RaceId>();
+
+        // Get the name of the current car prefab, which has "clone" for some reason
         string currentCarPrefabName = originalCar.name.Replace("(Clone)", "").Trim();
 
         GameObject newCarPrefab = GetRandomDifferentCarPrefab(currentCarPrefabName);
-        if (newCarPrefab == null)
+        if (!newCarPrefab)
         {
             yield break;
         }
@@ -200,7 +203,8 @@ public class PowerupManager : MonoBehaviour
         GameObject newCar = Instantiate(newCarPrefab, spawnPosition, currentRotation);
         newCar.tag = "Player";
 
-        SetUpCar(newCar);
+        // Set up the new car
+        SetUpCar(newCar, originalRaceId);
 
         Rigidbody newCarRigidbody = newCar.GetComponent<Rigidbody>();
         newCarRigidbody.velocity = currentVelocity;
@@ -224,7 +228,8 @@ public class PowerupManager : MonoBehaviour
         originalCarRigidbody.velocity = currentVelocity;
         originalCarRigidbody.angularVelocity = currentAngularVelocity;
 
-        SetUpCar(originalCar);
+        // Update camera and controls for the original car
+        SetUpCar(originalCar, originalRaceId);
 
         newCar.SetActive(false);
         Destroy(newCar);
@@ -240,19 +245,27 @@ public class PowerupManager : MonoBehaviour
         return availablePrefabs[Random.Range(0, availablePrefabs.Count)];
     }
 
-    private void SetUpCar(GameObject car)
+    private void SetUpCar(GameObject car, RaceId originalRaceId)
     {
         PlayerDriver playerDriver = car.AddComponent<PlayerDriver>();
         CarController carController = car.GetComponent<CarController>();
         playerDriver.SetCarController(carController);
 
-        if (car.GetComponent<AiDriver>() != null)
+        if (originalRaceId) {
+            foreach (RaceId raceId in car.GetComponents<RaceId>()) {
+                raceId.id = originalRaceId.id;
+            }
+        }
+
+        if (car.GetComponent<AiDriver>())
         {
             car.GetComponent<AiDriver>().enabled = false;
         }
 
         FindCamera();
-        if (virtualCamera != null)
+        // Update camera
+        CinemachineVirtualCamera virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        if (virtualCamera)
         {
             virtualCamera.Follow = car.transform;
             virtualCamera.LookAt = car.transform;
