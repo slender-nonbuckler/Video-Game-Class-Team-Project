@@ -35,7 +35,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
     [Header("Parameters")]
     [SerializeField]
-    private float countdownLength = 4f;
+    private float countdownLength = 3f;
 
     [SerializeField] private int lapsNeededToFinish = 1;
     private bool isCountdownStarted = false;
@@ -173,20 +173,13 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         }
     }
 
-    private void UpdateCountdown()
-    {
+    private void UpdateCountdown() {
+        countdownTimer -= Time.deltaTime;
+        UpdateCountdownText();
+        
         if (isCountdownStarted == false || isCountdownFinished)
         {
             return;
-        }
-
-        countdownTimer -= Time.deltaTime;
-
-        if (countdownText != null)
-        {
-            countdownText.gameObject.SetActive(true);
-            countdownText.text = Mathf.Floor(countdownTimer).ToString(); // Display countdown as integer
-            if (countdownTimer < 1f) countdownText.text = "Go!";
         }
 
         if (countdownTimer < 0f)
@@ -201,11 +194,26 @@ public class RaceManager : MonoBehaviour, IDataPersistence
 
             Debug.Log("OnDrivingStart");
             OnDrivingStart?.Invoke();
+        }
+    }
+    
+    private void UpdateCountdownText() {
+        if (!countdownText || !isCountdownStarted) {
+            return;
+        }
 
-            if (countdownText != null)
-            {
-                countdownText.gameObject.SetActive(false); // Hide the countdown text after the countdown is finished
-            }
+        switch (countdownTimer) {
+            case > 0:
+                countdownText.gameObject.SetActive(true);
+                countdownText.text = $"{Mathf.Floor(countdownTimer) + 1}";
+                break;
+            case > -1f:
+                countdownText.gameObject.SetActive(true);
+                countdownText.text = "Go!";
+                break;
+            default:
+                countdownText.gameObject.SetActive(false);
+                break;
         }
     }
 
