@@ -92,37 +92,37 @@ public class PowerupManager : MonoBehaviour
 
     private void InitializePowerups()
     {
-        // // Size Increase
-        // availablePowerups.Add(new PowerupInfo
-        // {
-        //     name = "Size Increase",
-        //     duration = 7f,
-        //     applyEffect = (car) =>
-        //     {
-        //         StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 2f, true));
-        //     },
-        //     removeEffect = (car) =>
-        //     {
-        //         StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
-        //         StartCoroutine(ResetCameraEffect(car));
-        //     }
-        // });
-        //
-        // // Size Decrease
-        // availablePowerups.Add(new PowerupInfo
-        // {
-        //     name = "Size Decrease",
-        //     duration = 7f,
-        //     applyEffect = (car) =>
-        //     {
-        //         StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 0.5f, false));
-        //     },
-        //     removeEffect = (car) =>
-        //     {
-        //         StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
-        //         StartCoroutine(ResetCameraEffect(car));
-        //     }
-        // });
+        // Size Increase
+        availablePowerups.Add(new PowerupInfo
+        {
+            name = "Size Increase",
+            duration = 7f,
+            applyEffect = (car) =>
+            {
+                StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 2f, true));
+            },
+            removeEffect = (car) =>
+            {
+                StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
+                StartCoroutine(ResetCameraEffect(car));
+            }
+        });
+        
+        // Size Decrease
+        availablePowerups.Add(new PowerupInfo
+        {
+            name = "Size Decrease",
+            duration = 7f,
+            applyEffect = (car) =>
+            {
+                StartCoroutine(ApplyPowerupEffect(car, car.transform.localScale * 0.5f, false));
+            },
+            removeEffect = (car) =>
+            {
+                StartCoroutine(SmoothScale(car.transform, Vector3.one, 0.5f));
+                StartCoroutine(ResetCameraEffect(car));
+            }
+        });
 
         // Car Switch
         availablePowerups.Add(new PowerupInfo
