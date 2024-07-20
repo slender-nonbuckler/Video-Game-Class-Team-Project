@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PowerupManager : MonoBehaviour
 {
@@ -23,19 +24,28 @@ public class PowerupManager : MonoBehaviour
     public List<GameObject> carPrefabs;
     public TextMeshProUGUI powerupText;
 
-
-    public CinemachineVirtualCamera virtualCamera;
+    [SerializeField]
+    private CinemachineVirtualCamera virtualCamera;
     public float defaultFOV = 60f;
     public Vector3 defaultFollowOffset = new Vector3(0f, 5f, -10f);
-
 
     private Coroutine activePowerupCoroutine;
 
     private void OnEnable()
     {
         ResetManager();
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ResetManager();
+    }
 
     private void Awake()
     {
@@ -44,7 +54,6 @@ public class PowerupManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             InitializePowerups();
-            ResetManager();
         }
         else
         {
@@ -57,10 +66,11 @@ public class PowerupManager : MonoBehaviour
         if (activePowerupCoroutine != null)
         {
             StopCoroutine(activePowerupCoroutine);
+            //resetting powerupmanager on scene restart
             activePowerupCoroutine = null;
         }
 
-        // Reset camera to default values
+        FindCamera();
         if (virtualCamera != null)
         {
             virtualCamera.m_Lens.FieldOfView = defaultFOV;
@@ -72,30 +82,16 @@ public class PowerupManager : MonoBehaviour
         }
     }
 
-    // This is where you can define more powerups
+    private void FindCamera()
+    {
+        if (virtualCamera == null)
+        {
+            virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        }
+    }
+
     private void InitializePowerups()
     {
-        // Speed Boost
-        /*        availablePowerups.Add(new PowerupInfo
-                {
-                    name = "Speed Boost",
-                    duration = 5f,
-                    applyEffect = (car) =>
-                    {
-                        float boostedSpeed = car.TopSpeed * 1.5f;
-                        powerupText.text = "Speed boost applied!";
-                        Debug.Log($"PowerupManager: Applying speed boost. Current speed: {car.TopSpeed}, Boosted speed: {boostedSpeed}");
-                        car.SetTemporaryTopSpeed(boostedSpeed);
-                    },
-                    removeEffect = (car) =>
-                    {
-                        Debug.Log($"PowerupManager: Removing speed boost. Current speed before reset: {car.TopSpeed}");
-                        car.ResetTopSpeed();
-                        powerupText.text = "";
-                        Debug.Log($"PowerupManager: Speed after reset: {car.TopSpeed}");
-                    }
-                });*/
-
         // Size Increase
         availablePowerups.Add(new PowerupInfo
         {
@@ -128,7 +124,7 @@ public class PowerupManager : MonoBehaviour
             }
         });
 
-
+        // Car Switch
         availablePowerups.Add(new PowerupInfo
         {
             name = "Car Switch",
@@ -143,8 +139,10 @@ public class PowerupManager : MonoBehaviour
             }
         });
     }
+
     private IEnumerator CameraUpdate(float targetFOV, Vector3 targetOffset, float duration)
     {
+        FindCamera();
         if (virtualCamera != null)
         {
             float startFOV = virtualCamera.m_Lens.FieldOfView;
@@ -181,6 +179,7 @@ public class PowerupManager : MonoBehaviour
         }
         return null;
     }
+
     private IEnumerator SwitchCarCoroutine(CarController currentCar)
     {
         GameObject originalCar = currentCar.gameObject;
@@ -194,14 +193,12 @@ public class PowerupManager : MonoBehaviour
         // Get the name of the current car prefab, which has "clone" for some reason
         string currentCarPrefabName = originalCar.name.Replace("(Clone)", "").Trim();
 
-        // Randomly select a different car prefab
         GameObject newCarPrefab = GetRandomDifferentCarPrefab(currentCarPrefabName);
         if (!newCarPrefab)
         {
             yield break;
         }
 
-        // Instantiate the new car slightly above the current position for some collision avoidance?
         Vector3 spawnPosition = currentPosition + Vector3.up * 0.3f;
         GameObject newCar = Instantiate(newCarPrefab, spawnPosition, currentRotation);
         newCar.tag = "Player";
@@ -209,30 +206,24 @@ public class PowerupManager : MonoBehaviour
         // Set up the new car
         SetUpCar(newCar, originalRaceId);
 
-        // Set the velocity of the new car to match the original car
         Rigidbody newCarRigidbody = newCar.GetComponent<Rigidbody>();
         newCarRigidbody.velocity = currentVelocity;
         newCarRigidbody.angularVelocity = currentAngularVelocity;
 
-        // Disable the original car
         originalCar.SetActive(false);
 
-        // Wait for the duration of the powerup
         yield return new WaitForSeconds(10f);
 
-        // Prepare to revert to the original car
         currentPosition = newCar.transform.position;
         currentRotation = newCar.transform.rotation;
         currentVelocity = newCarRigidbody.velocity;
         currentAngularVelocity = newCarRigidbody.angularVelocity;
 
-        // Reactivate the original car slightly above the current position
         spawnPosition = currentPosition + Vector3.up * 0.3f;
         originalCar.transform.position = spawnPosition;
         originalCar.transform.rotation = currentRotation;
         originalCar.SetActive(true);
 
-        // Set the velocity of the original car to match the new car
         Rigidbody originalCarRigidbody = originalCar.GetComponent<Rigidbody>();
         originalCarRigidbody.velocity = currentVelocity;
         originalCarRigidbody.angularVelocity = currentAngularVelocity;
@@ -240,7 +231,6 @@ public class PowerupManager : MonoBehaviour
         // Update camera and controls for the original car
         SetUpCar(originalCar, originalRaceId);
 
-        // Deactivate and destroy the temporary car
         newCar.SetActive(false);
         Destroy(newCar);
     }
@@ -272,6 +262,7 @@ public class PowerupManager : MonoBehaviour
             car.GetComponent<AiDriver>().enabled = false;
         }
 
+        FindCamera();
         // Update camera
         CinemachineVirtualCamera virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
         if (virtualCamera)
@@ -280,6 +271,7 @@ public class PowerupManager : MonoBehaviour
             virtualCamera.LookAt = car.transform;
         }
     }
+
     private IEnumerator SmoothScale(Transform target, Vector3 endScale, float duration)
     {
         Vector3 startScale = target.localScale;
@@ -293,7 +285,7 @@ public class PowerupManager : MonoBehaviour
             yield return null;
         }
 
-        target.localScale = endScale; // Ensure we end up at the exact desired scale
+        target.localScale = endScale;
     }
 
     public PowerupInfo GetRandomPowerup()
@@ -306,12 +298,10 @@ public class PowerupManager : MonoBehaviour
         return null;
     }
 
-
     private IEnumerator ApplyPowerupEffect(CarController car, Vector3 targetScale, bool isIncreasing)
     {
         yield return StartCoroutine(SmoothScale(car.transform, targetScale, 0.5f));
 
-        // Player car only for camera updates, otherwise running into other cars would adjust the camera
         if (car.gameObject.CompareTag("Player"))
         {
             float targetFOV;
@@ -334,6 +324,7 @@ public class PowerupManager : MonoBehaviour
 
     public void ApplyPowerup(PowerupInfo powerup, CarController car)
     {
+        FindCamera();
         if (activePowerupCoroutine != null)
         {
             StopCoroutine(activePowerupCoroutine);
@@ -357,5 +348,4 @@ public class PowerupManager : MonoBehaviour
             yield return StartCoroutine(CameraUpdate(defaultFOV, defaultFollowOffset, 0.5f));
         }
     }
-
 }
