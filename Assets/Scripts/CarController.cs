@@ -53,10 +53,7 @@ public class CarController : MonoBehaviour {
     private float resetCooldown = 5f;
     private float resetOnCooldownTill = 0f;
     
-    private float speedBoostAccelerationAmount = 20.0f;
-    private float speedBoostAccelerationAmountRamp = 25.0f;
-
-
+    
     //Getters for car selection information display
     public float TopSpeed {
         get {
@@ -307,18 +304,4 @@ public class CarController : MonoBehaviour {
             }
         }
     }
-    
-    private void OnTriggerEnter(Collider other)
-    {
-        switch (other.gameObject.tag)
-        {
-            case "SpeedBoost":
-                carRigidbody.AddForce(transform.forward * speedBoostAccelerationAmount, ForceMode.Impulse);
-                break;
-            case "SpeedBoostRamp":
-                carRigidbody.AddForce(transform.forward * speedBoostAccelerationAmountRamp, ForceMode.Impulse);
-                break;
-        }
-    }
-
 }
