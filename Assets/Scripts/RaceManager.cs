@@ -101,6 +101,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             racer.transform.rotation = startPosition.rotation;
 
             RaceId raceId = racer.AddComponent<RaceId>();
+            raceId.id = RaceId.nextId;
             racers.Add(raceId);
             progressByCar[raceId.id] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
         }
