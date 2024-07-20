@@ -104,7 +104,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         {
             GameObject currentCar = allCars[currentCarIndex];
             currentCar.transform.position = carDisplayPosition;
-            currentCar.transform.rotation = Quaternion.identity;
+            currentCar.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             CarController carInfo = currentCar.GetComponent<CarController>();
             UpdateCarInfoText(currentCar);
             UpdateButtonStatus(currentCar);
