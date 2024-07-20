@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine.Utility;
 using UnityEngine;
 
 public class TireComponent : MonoBehaviour {
@@ -66,7 +67,11 @@ public class TireComponent : MonoBehaviour {
         
         if (Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers)) {
             isGrounded = true;
-            Vector3 totalForces = GetSuspensionForce(raycastHit) + GetGripForce(raycastHit) + GetRollForce(raycastHit); 
+            Vector3 totalForces = GetSuspensionForce(raycastHit) + GetGripForce(raycastHit) + GetRollForce(raycastHit);
+            if (totalForces.IsNaN()) {
+                return;
+            }
+            
             rigidbodyAttachedTo.AddForceAtPosition(totalForces, transform.position);
             
             if (isShowingSuspensionForce) { Debug.DrawLine(raycastHit.point + GetSuspensionForce(raycastHit), raycastHit.point, Color.green); }
