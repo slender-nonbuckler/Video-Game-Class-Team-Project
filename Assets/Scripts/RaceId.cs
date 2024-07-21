@@ -1,11 +1,8 @@
 using UnityEngine;
 
 public class RaceId : MonoBehaviour {
-    private static int nextId = 0;
+    public static int nextId => _nextId++;
+    private static int _nextId;
 
     public int id;
-    
-    public RaceId() {
-        id = nextId++;
-    }
 }
