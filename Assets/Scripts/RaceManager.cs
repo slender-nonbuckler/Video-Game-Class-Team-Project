@@ -37,7 +37,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
     [SerializeField]
     private float countdownLength = 3f;
 
-    [SerializeField] private int lapsNeededToFinish = 1;
+    [SerializeField] private int lapsNeededToFinish = 2;
     private bool isCountdownStarted = false;
     private bool isCountdownFinished = false;
     private float countdownTimer = 0f;
@@ -352,14 +352,17 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             return;
         }
 
-        raceProgress.checkpointsCompleted++;
         Debug.Log($"{raceId} passed checkpoint {checkpoint.id}");
+
 
         if (checkpoint.id == 0 && raceProgress.previousCheckpointId != int.MinValue)
         {
             raceProgress.lapsCompleted++;
             raceProgress.checkpointsCompleted = 0;
         }
+        raceProgress.checkpointsCompleted++;
+        
+        
 
         if (raceProgress.lapsCompleted >= lapsNeededToFinish)
         {
@@ -445,7 +448,7 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         public RaceProgress(int totalLaps, int totalCheckpoints)
         {
             lapWeight = 1f / totalLaps;
-            checkpointWeight = 1f / totalCheckpoints;
+            checkpointWeight = 1f / (totalCheckpoints + 1);
         }
 
         public void CompleteRace()
