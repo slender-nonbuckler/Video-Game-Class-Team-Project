@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CarController : MonoBehaviour {
+    public event EventHandler<CarController> OnReset;
+    
     [Header("References")] [SerializeField]
     private Rigidbody carRigidbody;
 
@@ -90,7 +92,7 @@ public class CarController : MonoBehaviour {
         }
 
         if (isResetDown) {
-            Reset();
+            Reset(false);
         }
 
         UpdateForceVisualSettings();
@@ -108,6 +110,10 @@ public class CarController : MonoBehaviour {
         this.isResetDown = isResetDown;
     }
 
+    public void ForceReset() {
+        Reset(true);
+    }
+
     private bool getIsGrounded() {
         foreach (TireComponent tireComponent in tireComponents) {
             if (tireComponent.IsGrounded()) {
@@ -118,8 +124,8 @@ public class CarController : MonoBehaviour {
         return false;
     }
 
-    private void Reset() {
-        if (resetOnCooldownTill > Time.time) {
+    private void Reset(bool isForced) {
+        if (!isForced && resetOnCooldownTill > Time.time) {
             return;
         }
 
@@ -129,6 +135,8 @@ public class CarController : MonoBehaviour {
         transform.rotation = Quaternion.LookRotation(transform.forward);
         carRigidbody.angularVelocity = Vector3.zero;
         carRigidbody.velocity = Vector3.zero;
+        
+        OnReset?.Invoke(this,this);
     }
 
     private void UpdateForceVisualSettings() {

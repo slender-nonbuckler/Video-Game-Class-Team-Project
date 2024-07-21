@@ -104,6 +104,11 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             raceId.id = RaceId.nextId;
             racers.Add(raceId);
             progressByCar[raceId.id] = new RaceProgress(lapsNeededToFinish, checkpoints.Count);
+
+            CarController carController = racerGameObjects[i].GetComponent<CarController>();
+            if (carController) {
+                carController.OnReset += HandleCarControllerReset;
+            }
         }
 
         DisableDrivers();
@@ -378,6 +383,29 @@ public class RaceManager : MonoBehaviour, IDataPersistence
         raceProgress.previousCheckpointId = raceProgress.nextCheckpointId;
         raceProgress.nextCheckpointId++;
         raceProgress.nextCheckpointId %= checkpoints.Count;
+    }
+
+    private void HandleCarControllerReset(object sender, CarController carController) {
+        Debug.Log($"{carController} was reset");
+        RaceId raceId = carController.GetComponent<RaceId>();
+        if (!raceId) {
+            return;
+        }
+
+        RaceProgress progress = progressByCar[raceId.id];
+        int previousCheckpoint = progress.previousCheckpointId;
+        if (previousCheckpoint < 0) {
+            return;
+        }
+
+        Checkpoint lastCheckpoint = checkpoints[previousCheckpoint];
+        Transform resetTransform = lastCheckpoint.resetTransform;
+        if (!resetTransform) {
+            return;
+        }
+        
+        carController.transform.position = resetTransform.position;
+        carController.transform.rotation = resetTransform.rotation;
     }
 
     private void EnableDrivers()
