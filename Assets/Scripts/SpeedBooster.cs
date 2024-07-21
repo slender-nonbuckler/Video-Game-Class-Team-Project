@@ -8,7 +8,6 @@ public class SpeedBooster : MonoBehaviour {
             return;
         }
         
-        Debug.Log($"Boosting: {other.gameObject}");
         other.attachedRigidbody.AddForce(transform.forward * boostForce, ForceMode.VelocityChange);
     }
 }
