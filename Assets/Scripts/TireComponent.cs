@@ -73,6 +73,9 @@ public class TireComponent : MonoBehaviour {
             }
             
             rigidbodyAttachedTo.AddForceAtPosition(totalForces, transform.position);
+
+            Rigidbody otherRigidbody = raycastHit.rigidbody;
+            otherRigidbody?.AddForceAtPosition(-totalForces, raycastHit.point);
             
             if (isShowingSuspensionForce) { Debug.DrawLine(raycastHit.point + GetSuspensionForce(raycastHit), raycastHit.point, Color.green); }
             if (isShowingRollForce) { Debug.DrawLine(raycastHit.point + GetRollForce(raycastHit), raycastHit.point, Color.blue); }
