@@ -8,6 +8,8 @@ using UnityEngine;
  */
 public class Checkpoint : MonoBehaviour {
     [SerializeField] private int _id;
+    [SerializeField] public Transform resetTransform;
+    
     public int id {
         get => _id;
         set => _id = value;
