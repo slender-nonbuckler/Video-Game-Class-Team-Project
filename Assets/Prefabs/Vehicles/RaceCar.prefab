@@ -1,5 +1,50 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &196891254774982590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4223238108826236178}
+  - component: {fileID: 618317799715604364}
+  m_Layer: 3
+  m_Name: TriggerCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4223238108826236178
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196891254774982590}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.783, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7695142745461179799}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &618317799715604364
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196891254774982590}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.4, y: 1.265, z: 5.1}
+  m_Center: {x: 0, y: 0.05, z: 0}
 --- !u!1 &966162869639883413
 GameObject:
   m_ObjectHideFlags: 0
@@ -25,7 +70,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 966162869639883413}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.4190769, y: 2.2431908, z: -0.30437088}
+  m_LocalPosition: {x: 0, y: 0.6300001, z: 0.54999924}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -268,7 +313,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2071853524445712508}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.4190769, y: 2.2431908, z: -0.30437088}
+  m_LocalPosition: {x: 0, y: 0.63, z: 0.55}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1215,6 +1260,7 @@ Transform:
   - {fileID: 8205088583976217145}
   - {fileID: 4806766716710998074}
   - {fileID: 2929999836214933009}
+  - {fileID: 4223238108826236178}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1306,7 +1352,7 @@ MonoBehaviour:
   selfRightingStrength: 0.5
   selfRightingDamping: 0.4
   airSteeringStrength: 3
-  tireRadius: 0.59
+  tireRadius: 0.6
   tireMass: 0.5
   tireRollingDrag: 5
   tireGripCurve:
@@ -1369,6 +1415,8 @@ MonoBehaviour:
   noiseLerpFactor: 0
   timeBetweenNoiseChanges: 0.3
   noiseWeight: 0
+  resetThreshold: 10
+  resetUtility: 0
 --- !u!114 &6376854613611955004
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -18,6 +18,10 @@ public class Checkpoint : MonoBehaviour {
     public event EventHandler<RaceId> OnPassCheckpoint;
     
     private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.layer != LayerMask.NameToLayer("TriggerColliders")) {
+            return;
+        }
+        
         RaceId raceId = other.attachedRigidbody.GetComponent<RaceId>();
         if (!raceId) {
             return;
