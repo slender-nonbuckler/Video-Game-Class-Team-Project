@@ -14,7 +14,7 @@ public class TutorialTextCycler : MonoBehaviour
     public Button leftButton; 
     public Button rightButton;
 
-    public Button finishTutorial;
+    public GameObject finishTutorial;
 
     private string[] tutorialLines = {
         "Welcome to the tutorial",
@@ -65,7 +65,7 @@ public class TutorialTextCycler : MonoBehaviour
 
             currentLineIndex++; 
         }
-        finishTutorial.gameObject.SetActive(true);
+        finishTutorial.SetActive(true);
     }
 
     void Update()
