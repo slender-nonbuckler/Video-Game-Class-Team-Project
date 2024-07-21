@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine.Utility;
 using UnityEngine;
 
 public class TireComponent : MonoBehaviour {
@@ -8,7 +9,6 @@ public class TireComponent : MonoBehaviour {
     [SerializeField] public LayerMask drivableLayers;
     [SerializeField] private Transform tireVisual;
     [SerializeField] public float tireRadius;
-
     
     [Header("Steering Settings")]
     [SerializeField] public bool isSteerable;
@@ -67,8 +67,15 @@ public class TireComponent : MonoBehaviour {
         
         if (Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers)) {
             isGrounded = true;
-            Vector3 totalForces = GetSuspensionForce(raycastHit) + GetGripForce(raycastHit) + GetRollForce(raycastHit); 
+            Vector3 totalForces = GetSuspensionForce(raycastHit) + GetGripForce(raycastHit) + GetRollForce(raycastHit);
+            if (totalForces.IsNaN()) {
+                return;
+            }
+            
             rigidbodyAttachedTo.AddForceAtPosition(totalForces, transform.position);
+
+            Rigidbody otherRigidbody = raycastHit.rigidbody;
+            otherRigidbody?.AddForceAtPosition(-totalForces, raycastHit.point);
             
             if (isShowingSuspensionForce) { Debug.DrawLine(raycastHit.point + GetSuspensionForce(raycastHit), raycastHit.point, Color.green); }
             if (isShowingRollForce) { Debug.DrawLine(raycastHit.point + GetRollForce(raycastHit), raycastHit.point, Color.blue); }
@@ -100,7 +107,8 @@ public class TireComponent : MonoBehaviour {
         float desiredVelocityChange = -slideVelocity * gripFactor;
         float desiredAcceleration = desiredVelocityChange / Time.fixedDeltaTime;
 
-        return transform.right * (mass * desiredAcceleration);
+        float dynamicFrictionCoefficient = raycastHit.collider.material.dynamicFriction;
+        return transform.right * (mass * desiredAcceleration * dynamicFrictionCoefficient);
     }
 
     private Vector3 GetRollForce(RaycastHit raycastHit) {
@@ -115,26 +123,20 @@ public class TireComponent : MonoBehaviour {
         float rollVelocity = Vector3.Dot(rigidbodyForward, rigidbodyAttachedTo.velocity);
         float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(rollVelocity) / maxSpeed);
 
-        if (accelerationInput > 0.0f) {
-            if (normalizedSpeed == 1f) {
+        if (accelerationInput != 0.0f && normalizedSpeed >= 1f) {
                 return Vector3.zero;
-            }
-            float availableTorque = torqueCurve.Evaluate(normalizedSpeed) * accelerationInput;
+        }
 
-            rollForce = accelerationDirection * (availableTorque * maxSpeed);
-        } else if (accelerationInput < 0.0f) {
-            if (normalizedSpeed == 1f) {
-                return Vector3.zero;
-            }
+        if (accelerationInput != 0.0f) {
             float availableTorque = torqueCurve.Evaluate(normalizedSpeed) * accelerationInput;
-
             rollForce = accelerationDirection * (availableTorque * maxSpeed);
         } else {
             float normalizedSignedSpeed = Mathf.Clamp(rollVelocity / maxSpeed, -1f, 1f);
             rollForce = -rigidbodyForward * (rollDrag * normalizedSignedSpeed);
         }
 
-        return rollForce;
+        float staticFrictionCoefficient = raycastHit.collider.material.staticFriction;
+        return rollForce * staticFrictionCoefficient;
     }
 
     private void Steer() {

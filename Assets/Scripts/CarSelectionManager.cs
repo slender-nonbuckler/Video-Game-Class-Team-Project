@@ -104,7 +104,7 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
         {
             GameObject currentCar = allCars[currentCarIndex];
             currentCar.transform.position = carDisplayPosition;
-            currentCar.transform.rotation = Quaternion.identity;
+            currentCar.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             CarController carInfo = currentCar.GetComponent<CarController>();
             UpdateCarInfoText(currentCar);
             UpdateButtonStatus(currentCar);
@@ -136,9 +136,9 @@ public class CarSelectionManager : MonoBehaviour, IDataPersistence
                 infoText += $"Cost: ${cost}\n";
             }
 
-            infoText += $"Top Speed: {carInfo.TopSpeed}\n" +
-                        $"Grip: {carInfo.TireRadius}\n" +
-                        $"Handling: {System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2)}";
+            infoText += $"Top Speed: {carInfo.TopSpeed / 5} / 10\n" +
+                        $"Suspension: {System.Math.Round(carInfo.Strength / 300 * 10, 1)} / 10\n" +
+                        $"Handling: {System.Math.Round((System.Math.Round(((double)carInfo.MaxSteeringAngle * 0.4 + (double)carInfo.TireRadius * 0.3 + (double)carInfo.Strength * 0.2 + (double)carInfo.Damping * 0.1) / 10, 2)) / 7 * 10, 1)} / 10";
 
             carInfoText.text = infoText;
         }

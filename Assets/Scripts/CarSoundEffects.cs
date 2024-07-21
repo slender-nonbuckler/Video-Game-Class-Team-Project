@@ -34,11 +34,16 @@ public class CarSoundEffects : MonoBehaviour
     
     private void OnCollisionEnter(Collision otherEntity)
     {
-        if (otherEntity.gameObject.CompareTag("Car"))
-        {
-            collisionAudioSource.clip = carCollisionSounds[Random.Range(0, carCollisionSounds.Length)];
-            collisionAudioSource.pitch = Random.Range(carCollisionPitchMin, carCollisionPitchMax);
-            collisionAudioSource.PlayOneShot(collisionAudioSource.clip);
+        if (!otherEntity.gameObject.CompareTag("Car")) {
+            return;
         }
+
+        if (carCollisionSounds.Length <= 0) {
+            return;
+        }
+        
+        collisionAudioSource.clip = carCollisionSounds[Random.Range(0, carCollisionSounds.Length)];
+        collisionAudioSource.pitch = Random.Range(carCollisionPitchMin, carCollisionPitchMax);
+        collisionAudioSource.PlayOneShot(collisionAudioSource.clip);
     }
 }

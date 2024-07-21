@@ -8,6 +8,8 @@ TagManager:
   - StartTarget
   - Car
   - AiDataManager
+  - SpeedBoost
+  - SpeedBoostRamp
   layers:
   - Default
   - TransparentFX
