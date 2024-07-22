@@ -65,7 +65,7 @@ public class TireComponent : MonoBehaviour {
     private void ApplyTotalForces() {
         RaycastHit raycastHit;
         
-        if (Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers)) {
+        if (Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers, QueryTriggerInteraction.Ignore)) {
             isGrounded = true;
             Vector3 totalForces = GetSuspensionForce(raycastHit) + GetGripForce(raycastHit) + GetRollForce(raycastHit);
             if (totalForces.IsNaN()) {
@@ -156,7 +156,7 @@ public class TireComponent : MonoBehaviour {
         }
 
         RaycastHit raycastHit;
-        bool isHit = Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers);
+        bool isHit = Physics.Raycast(transform.position, -transform.up, out raycastHit, restDistance, drivableLayers, QueryTriggerInteraction.Ignore);
 
         UpdateTirePosition(raycastHit, isHit);
         RotateTireVisual(raycastHit, isHit);
