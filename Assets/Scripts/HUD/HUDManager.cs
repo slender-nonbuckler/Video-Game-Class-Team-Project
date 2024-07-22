@@ -38,7 +38,14 @@ public class HUDManager : MonoBehaviour
         }
         
         playerPositionText.text = $"# {playerProgress.racePosition} / {carProgress.Count}";
-        lapInfoText.text = $"Lap {playerProgress.lapsCompleted + famousOffByOne} / {lapsNeededToFinish}";
+        if (playerProgress.lapsCompleted == 2)
+        {
+            lapInfoText.text = $"Lap {playerProgress.lapsCompleted} / {lapsNeededToFinish}";
+        }
+        else
+        {
+            lapInfoText.text = $"Lap {playerProgress.lapsCompleted + famousOffByOne} / {lapsNeededToFinish}";
+        }
     }
 
     private bool FindPlayerRaceId() {
