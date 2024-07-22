@@ -5,6 +5,10 @@ public class AiTarget : MonoBehaviour {
 
     public const string START_TAG = "StartTarget";
     private void OnDrawGizmos() {
+        if (!nextTarget) {
+            return;
+        }
+        
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, nextTarget.position);
     }
