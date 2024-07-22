@@ -8,6 +8,7 @@ public class HUDManager : MonoBehaviour
     public RaceManager raceManager;
 
     private RaceId playerRaceId;
+    private int famousOffByOne = 1;
     
     private void Update()
     {
@@ -37,7 +38,7 @@ public class HUDManager : MonoBehaviour
         }
         
         playerPositionText.text = $"# {playerProgress.racePosition} / {carProgress.Count}";
-        lapInfoText.text = $"Lap {playerProgress.lapsCompleted} / {lapsNeededToFinish}";
+        lapInfoText.text = $"Lap {playerProgress.lapsCompleted + famousOffByOne} / {lapsNeededToFinish}";
     }
 
     private bool FindPlayerRaceId() {
