@@ -539,7 +539,9 @@ MonoBehaviour:
   previousCarSpeed: 0
   engineAudioSource: {fileID: 7358131646965354816}
   collisionAudioSource: {fileID: 6110502246118780703}
-  carCollisionSounds: []
+  carCollisionSounds:
+  - {fileID: 8300000, guid: 47536f53edca86549b12b72afcbc73f7, type: 3}
+  - {fileID: 8300000, guid: 56b85cb622a62de47beea63e0abb0c08, type: 3}
 --- !u!1 &399344324638621680
 GameObject:
   m_ObjectHideFlags: 0
