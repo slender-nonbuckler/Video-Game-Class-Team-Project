@@ -44,6 +44,6 @@ public class CarSoundEffects : MonoBehaviour
         
         collisionAudioSource.clip = carCollisionSounds[Random.Range(0, carCollisionSounds.Length)];
         collisionAudioSource.pitch = Random.Range(carCollisionPitchMin, carCollisionPitchMax);
-        collisionAudioSource.PlayOneShot(collisionAudioSource.clip);
+        collisionAudioSource.PlayOneShot(collisionAudioSource.clip, 0.2f);
     }
 }
