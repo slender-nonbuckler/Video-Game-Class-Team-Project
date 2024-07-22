@@ -113,24 +113,25 @@ public class RacePauseMenu : MonoBehaviour, IDataPersistence
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
-        DataPersistentManager.instance.SaveGame();
+        DataPersistentManager.instance?.SaveGame();
         SceneManager.LoadScene("Menu");
     }
     public void QuitGame()
     {
         Time.timeScale = 1f;
-        DataPersistentManager.instance.SaveGame();
+        DataPersistentManager.instance?.SaveGame();
         Application.Quit();
     }
     public void RestartRound()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("Track1v2");
+        // SceneManager.LoadScene("Track1v2");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public void RaceAgain()
     {
         Time.timeScale = 1f;
-        DataPersistentManager.instance.SaveGame();
+        DataPersistentManager.instance?.SaveGame();
         SceneManager.LoadScene("Track1v2");
     }
     private void OnDisable()
