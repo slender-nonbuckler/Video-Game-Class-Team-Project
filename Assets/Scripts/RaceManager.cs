@@ -141,7 +141,9 @@ public class RaceManager : MonoBehaviour, IDataPersistence
             checkpoints[i].OnPassCheckpoint += HandlePassCheckpoint;
         }
 
-        testRacerGos.Insert(0, playerCarSpawnManager.selectedCar);
+        if (playerCarSpawnManager) {
+            testRacerGos.Insert(0, playerCarSpawnManager.selectedCar);
+        }
         PositionRacers(testRacerGos);
         StartRaceCountdown();
 
