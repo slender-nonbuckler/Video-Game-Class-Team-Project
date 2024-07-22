@@ -134,6 +134,20 @@ public class RacePauseMenu : MonoBehaviour, IDataPersistence
         DataPersistentManager.instance?.SaveGame();
         SceneManager.LoadScene("Track1v2");
     }
+
+    public void LoadTrack1()
+    {
+        Time.timeScale = 1f;
+        DataPersistentManager.instance?.SaveGame();
+        SceneManager.LoadScene("Track1v2");
+    }
+
+    public void LoadCrashCove()
+    {
+        Time.timeScale = 1f;
+        DataPersistentManager.instance?.SaveGame();
+        SceneManager.LoadScene("CrashCove");
+    }
     private void OnDisable()
     {
         if (raceManager != null)
