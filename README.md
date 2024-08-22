@@ -1,6 +1,6 @@
 # CS6457-NPE
-Private repository for Non-Playable Engineers
+This car racing game was made as part of a school team project. Team member: Luis, Damon,Nhi, Cole and myself.
 
-Since current main branch has no data to save, at this branch I added a score shown on screen to test the saving system.
+car racing game is developed from Unity, consists of two parts, tutorial and racing. Two tracks were made, the second track is available from the pause menu after you exit the tutorial.
 
-After testing successfully, I created a new branch called main_plus_save to add the saving system to the main branch(still no dataavailable to be saved in the main)
+You can play this game from this web version : https://jichunqin.itch.io/nitro-pocket-engine
